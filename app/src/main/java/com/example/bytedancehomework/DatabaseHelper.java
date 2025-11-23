@@ -130,6 +130,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return count;
     }
 
+    public boolean updateAll(List<FeedItem> items)
+    {
+        SQLiteDatabase db = null;
+        try {
+            db = getWritableDatabase();
+            db.beginTransaction();
+
+            // 1. 清空旧数据
+            db.delete(TABLE_FEED_ITEMS, null, null);
+
+            // 2. 插入新数据
+            for (FeedItem item : items) {
+                ContentValues values = new ContentValues();
+
+                values.put(COLUMN_TITLE, item.getTitle());
+                values.put(COLUMN_CONTENT, item.getContent());
+                values.put(COLUMN_IMAGE_URL, item.getImageUrl());
+                values.put(COLUMN_IMAGE_WIDTH, item.getImageWidth());
+                values.put(COLUMN_IMAGE_HEIGHT, item.getImageHeight());
+                values.put(COLUMN_CREATED_AT, item.getCreatedAt());
+                values.put(COLUMN_IS_FAVORITE, item.getIsFavorite());
+
+                db.insert(TABLE_FEED_ITEMS, null, values);
+            }
+
+            db.setTransactionSuccessful();
+            return true;
+
+        } catch (Exception e) {
+            Log.e("update错误", "updateAll: ");
+            return false;
+        } finally {
+            if (db != null) {
+                db.endTransaction();
+                db.close();
+            }
+        }
+    }
+
     /*
     通过id查找对应的FeedItem并返回
     @param id:想要查找的FeedItem的id
