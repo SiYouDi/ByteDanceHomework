@@ -12,6 +12,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:orientation="vertical"
         android:padding="8dp"
+        android:background="@drawable/border_layout"
 
         >
 
@@ -29,7 +30,10 @@
             android:layout_height="wrap_content"
             android:text="Content"
             android:gravity="center_vertical"
-            android:padding="8dp" />
+            android:padding="8dp"
+            android:maxLines="2"
+            android:minLines="1"
+            android:ellipsize="end"/>
 
         <ImageView
             android:id="@+id/imageView"
