@@ -2,32 +2,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="70dp"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:background="@android:color/white"
+    android:elevation="4dp"
+    >
 
     <Button
         android:id="@+id/buttonSearchBack"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:text="back"
         />
 
     <EditText
         android:id="@+id/editTextSerachInput"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="7" />
+        android:layout_weight="7"
+        android:hint="search"
+        />
 
     <Button
         android:id="@+id/buttonSearchAction"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"/>
-
-    <Button
-        android:id="@+id/buttonSearchChangeLayout"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:text="搜索"
+        />
 
 
 </LinearLayout>
