@@ -116,7 +116,8 @@ implements FlexibleAdapter.OnItemClickListener
     {
         recyclerView = findViewById(R.id.recycleViewFeed);
 
-        switchToSingleMode();
+        //switchToSingleMode();
+        switchToGridMode();
 
         adapter.setOnItemClickListener(this);
     }
