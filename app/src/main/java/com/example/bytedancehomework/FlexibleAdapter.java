@@ -135,6 +135,14 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         notifyItemRemoved(position);
     }
 
+    public void delData()
+    {
+        dbHelper.deleteData();
+
+        items.clear();
+        notifyDataSetChanged();
+    }
+
     public void updateItem(int position,FeedItem item)
     {
         dbHelper.updateFeedItem(item);

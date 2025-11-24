@@ -46,11 +46,11 @@ implements FlexibleAdapter.OnItemClickListener
 
         dbhelper=new DatabaseHelper(this);
 
-        InitDateBase();
-
+        InitDate();
+        initRecycleView();
     }
 
-    private void InitDateBase()
+    private void InitDate()
     {
         items=dbhelper.getAllFeedItems();
 
@@ -88,6 +88,28 @@ implements FlexibleAdapter.OnItemClickListener
         }
     }
 
+    /*
+       添加一个新的示例项目
+     */
+    private void addNewSampleItem() {
+        FeedItem newItem = new FeedItem(
+                "新项目 " + System.currentTimeMillis(),
+                "这是通过菜单添加的新项目内容",
+                "new_url",
+                500, 400
+        );
+        adapter.addItem(newItem);
+        Toast.makeText(this, "已添加新项目", Toast.LENGTH_SHORT).show();
+    }
+
+    /*
+      清空所有数据
+     */
+    private void clearAllData() {
+        adapter.delData();
+        Toast.makeText(this, "已清空所有数据", Toast.LENGTH_SHORT).show();
+    }
+
 
     private void initRecycleView()
     {
@@ -109,7 +131,7 @@ implements FlexibleAdapter.OnItemClickListener
         }
         else
         {
-            adapter.setLayoutMode(LayoutMode.single);
+            adapter.switchLayoutMode(LayoutMode.single);
         }
     }
     private void switchToGridMode(){
@@ -122,7 +144,7 @@ implements FlexibleAdapter.OnItemClickListener
         }
         else
         {
-            adapter.setLayoutMode(LayoutMode.grid);
+            adapter.switchLayoutMode(LayoutMode.grid);
         }
     }
 

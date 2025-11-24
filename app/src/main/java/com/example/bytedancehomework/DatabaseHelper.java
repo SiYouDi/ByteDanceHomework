@@ -105,6 +105,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /*
+    删除所有元素
+    @return 被删除的行数，0表示没有找到匹配的记录
+     */
+    public int deleteData()
+    {
+        SQLiteDatabase db =this.getWritableDatabase();
+
+        int count=db.delete(TABLE_FEED_ITEMS,null,null);
+        db.close();
+
+        return count;
+    }
+
+    /*
 
     修改对应的FeedItem
     @param item:修改后的FeedItem
