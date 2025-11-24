@@ -1,4 +1,4 @@
-package com.example.bytedancehomework;
+package com.example.bytedancehomework.Enum;
 
 public enum LayoutMode
 {

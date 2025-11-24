@@ -1,28 +1,25 @@
-package com.example.bytedancehomework;
+package com.example.bytedancehomework.Activity;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 
-import com.google.android.material.snackbar.Snackbar;
+import com.example.bytedancehomework.DBHelper.DatabaseHelper;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.view.View;
-
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.bytedancehomework.Enum.LayoutMode;
+import com.example.bytedancehomework.Item.FeedItem;
+import com.example.bytedancehomework.Adapter.FlexibleAdapter;
+import com.example.bytedancehomework.R;
 import com.example.bytedancehomework.databinding.ActivityMainBinding;
 
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -128,7 +125,7 @@ implements FlexibleAdapter.OnItemClickListener
         recyclerView.setLayoutManager(layoutManager);
         if(adapter==null)
         {
-            adapter=new FlexibleAdapter(items,LayoutMode.single,dbhelper);
+            adapter=new FlexibleAdapter(items, LayoutMode.single,dbhelper);
             recyclerView.setAdapter(adapter);
         }
         else

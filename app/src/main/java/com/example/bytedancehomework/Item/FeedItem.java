@@ -1,4 +1,4 @@
-package com.example.bytedancehomework;
+package com.example.bytedancehomework.Item;
 
 public class FeedItem {
     private long id; // 数据库主键

@@ -1,10 +1,9 @@
-package com.example.bytedancehomework;
+package com.example.bytedancehomework.Adapter;
 
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -13,6 +12,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.bytedancehomework.DBHelper.DatabaseHelper;
+import com.example.bytedancehomework.Enum.LayoutMode;
+import com.example.bytedancehomework.Item.FeedItem;
+import com.example.bytedancehomework.R;
 
 import java.util.ArrayList;
 import java.util.List;

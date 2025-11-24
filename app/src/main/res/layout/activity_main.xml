@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".MainActivity">
+    tools:context=".Activity.MainActivity"
+    tools:ignore="MissingClass">
 
     <!-- AppBarLayout 用于管理工具栏的滚动行为 -->
     <com.google.android.material.appbar.AppBarLayout
@@ -36,10 +37,26 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- RecyclerView，设置 behavior 使其与 AppBarLayout 联动 -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycleViewFeed"
+    <!-- 添加下拉刷新布局 -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycleViewFeed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBarLoadMore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_margin="16dp"
+        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
