@@ -19,22 +19,33 @@ import java.util.List;
 
 public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseViewHolder> {
 
-    ArrayList<FeedItem> items;
+    List<FeedItem> items;
     DatabaseHelper dbHelper;
     LayoutMode layoutMode;
     OnItemClickListener itemClickListener;
 
+    //事件监听器
     public interface OnItemClickListener
     {
         void onItemClick(FeedItem item);
         void onItemLongClick(FeedItem item);
     }
 
-    public FlexibleAdapter(ArrayList<FeedItem>items,LayoutMode layoutMode,DatabaseHelper dbHelper)
+    public FlexibleAdapter(List<FeedItem>items,LayoutMode layoutMode,DatabaseHelper dbHelper)
     {
         this.items=items;
         this.layoutMode=layoutMode;
         this.dbHelper=dbHelper;
+    }
+
+    public void setLayoutMode(LayoutMode layoutMode)
+    {
+        if(this.layoutMode!=layoutMode)
+        {
+            this.layoutMode=layoutMode;
+            notifyDataSetChanged();
+        }
+
     }
 
     public void setOnItemClickListener(OnItemClickListener listener)
@@ -46,7 +57,7 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View itemView;
+        View itemView=null;
 
         switch (layoutMode)
         {
