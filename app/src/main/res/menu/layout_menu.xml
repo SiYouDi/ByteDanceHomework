@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_single_item"
+        android:title="单列显示"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/menu_grid_item"
+        android:title="双列显示"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/menu_staggered_item"
+        android:title="瀑布屏显示"
+        app:showAsAction="ifRoom"/>
+
+</menu>

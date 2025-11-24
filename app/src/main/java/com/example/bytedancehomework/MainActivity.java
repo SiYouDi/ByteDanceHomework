@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
@@ -148,7 +149,39 @@ implements FlexibleAdapter.OnItemClickListener
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.layout_menu,menu);
 
+        menu.add(Menu.NONE,100,Menu.NONE,"添加样例");
+        menu.add(Menu.NONE,101,Menu.NONE,"清空数据");
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menu_single_item) {
+            switchToSingleMode();
+            return true;
+        } else if (id == R.id.menu_grid_item) {
+            switchToGridMode();
+            return true;
+        } else if (id == R.id.menu_staggered_item) {
+            Toast.makeText(this, "该功能暂未开放", Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (id == 100) {
+            addNewSampleItem();
+            return true;
+        } else if (id == 101) {
+            clearAllData();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onItemClick(FeedItem item) {
