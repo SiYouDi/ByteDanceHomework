@@ -17,6 +17,7 @@ import com.example.bytedancehomework.Item.FeedItem;
 import com.example.bytedancehomework.Adapter.FlexibleAdapter;
 import com.example.bytedancehomework.R;
 import com.example.bytedancehomework.databinding.ActivityMainBinding;
+import com.example.bytedancehomework.tracker.ExposureTracker;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -117,6 +118,9 @@ implements FlexibleAdapter.OnItemClickListener
 //        switchToGridMode();
 
         adapter.setOnItemClickListener(this);
+
+        ExposureTracker exposureTracker    =new ExposureTracker();
+        exposureTracker.startTrack(recyclerView,items);
     }
 
     //瀑布屏暂时不做
