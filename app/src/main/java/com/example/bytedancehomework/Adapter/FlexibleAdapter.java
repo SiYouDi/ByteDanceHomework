@@ -27,6 +27,10 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
     LayoutMode layoutMode;
     OnItemClickListener itemClickListener;
 
+    private static final int VIEW_TYPE_SINGLE = 1;
+    private static final int VIEW_TYPE_GRID = 2;
+    private static final int VIEW_TYPE_STAGGERED = 3;
+
     //事件监听器
     public interface OnItemClickListener
     {
@@ -46,21 +50,36 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         this.itemClickListener=listener;
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        switch (layoutMode)
+        {
+            case single:
+                return VIEW_TYPE_SINGLE;
+            case grid:
+                return VIEW_TYPE_GRID;
+            case staggered:
+                return VIEW_TYPE_STAGGERED;
+            default:
+                return VIEW_TYPE_SINGLE;
+        }
+    }
+
     @NonNull
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View itemView=null;
 
-        switch (layoutMode)
+        switch (viewType)
         {
-            case single:
+            case VIEW_TYPE_SINGLE:
                 itemView=inflater.inflate(R.layout.layout_feed_item_single,parent,false);
                 break;
-            case grid:
+            case VIEW_TYPE_GRID:
                 itemView=inflater.inflate(R.layout.layout_feed_item_grid,parent,false);
                 break;
-            case staggered:
+            case VIEW_TYPE_STAGGERED:
                 itemView=inflater.inflate(R.layout.layout_feed_item_staggered,parent,false);
                 break;
             default:
