@@ -118,6 +118,16 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         items.add(0,item);
         notifyItemInserted(0);
     }
+    public void addNerSameleItem() {
+        FeedItem newItem = new FeedItem(
+                "新项目 " + System.currentTimeMillis(),
+                "这是通过菜单添加的新项目内容",
+                "new_url",
+                500, 400
+        );
+        addItem(newItem);
+    }
+
 
     public void delItem(int position)
     {

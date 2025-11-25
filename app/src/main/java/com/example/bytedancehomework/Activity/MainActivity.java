@@ -49,22 +49,22 @@ implements FlexibleAdapter.OnItemClickListener
 
         dbhelper=new DatabaseHelper(this);
 
-        InitDate();
+        InitData();
         initRecycleView();
     }
 
-    private void InitDate()
+    private void InitData()
     {
         items=dbhelper.getAllFeedItems();
 
         if(items.size()==0)
         {
-            addSampleDate();
+            addSampleData();
             items=dbhelper.getAllFeedItems();
         }
     }
 
-    private void addSampleDate()
+    private void addSampleData()
     {
         List<FeedItem> sampleItems = new ArrayList<>();
         sampleItems.add(new FeedItem("Android开发教程",
@@ -95,13 +95,7 @@ implements FlexibleAdapter.OnItemClickListener
        添加一个新的示例项目
      */
     private void addNewSampleItem() {
-        FeedItem newItem = new FeedItem(
-                "新项目 " + System.currentTimeMillis(),
-                "这是通过菜单添加的新项目内容",
-                "new_url",
-                500, 400
-        );
-        adapter.addItem(newItem);
+        adapter.addNerSameleItem();
         Toast.makeText(this, "已添加新项目", Toast.LENGTH_SHORT).show();
     }
 
