@@ -8,36 +8,25 @@
     tools:context=".Activity.MainActivity"
     tools:ignore="MissingClass">
 
-    <!-- AppBarLayout 用于管理工具栏的滚动行为 -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:background="@android:color/transparent"
+        >
 
-        <!-- 搜索栏作为可折叠的工具栏 -->
-        <com.google.android.material.appbar.CollapsingToolbarLayout
+        <include
+            android:id="@+id/searchBar"
+            layout="@layout/layout_search_bar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:contentScrim="?attr/colorPrimary"
-            app:expandedTitleMarginStart="16dp"
-            app:expandedTitleMarginEnd="16dp">
-
-            <!-- 搜索栏 -->
-            <include
-                android:id="@+id/searchBar"
-                layout="@layout/layout_search_bar"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                app:layout_collapseMode="pin" /> <!-- pin 表示在折叠时保持显示 -->
-
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
+            android:layout_height="60dp"
+            app:layout_scrollFlags="scroll|enterAlways|snap" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- RecyclerView，设置 behavior 使其与 AppBarLayout 联动 -->
     <!-- 添加下拉刷新布局 -->
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"

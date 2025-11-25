@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.engage.core)
     implementation(libs.swiperefreshlayout)
+    implementation(libs.google.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
