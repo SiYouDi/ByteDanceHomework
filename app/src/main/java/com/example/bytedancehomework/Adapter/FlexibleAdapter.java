@@ -41,16 +41,6 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         this.dbHelper=dbHelper;
     }
 
-    public void setLayoutMode(LayoutMode layoutMode)
-    {
-        if(this.layoutMode!=layoutMode)
-        {
-            this.layoutMode=layoutMode;
-            notifyDataSetChanged();
-        }
-
-    }
-
     public void setOnItemClickListener(OnItemClickListener listener)
     {
         this.itemClickListener=listener;

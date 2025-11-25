@@ -20,7 +20,11 @@ import com.example.bytedancehomework.databinding.ActivityMainBinding;
 import com.example.bytedancehomework.tracker.ExposureTracker;
 
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -114,6 +118,11 @@ implements FlexibleAdapter.OnItemClickListener
     {
         recyclerView = findViewById(R.id.recycleViewFeed);
 
+        ImageButton menuButton = findViewById(R.id.buttonMenu);
+        menuButton.setOnClickListener(v->{
+            showPopupMenu(v);
+        });
+
         switchToSingleMode();
 //        switchToGridMode();
 
@@ -151,14 +160,16 @@ implements FlexibleAdapter.OnItemClickListener
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.layout_menu,menu);
+    public void showPopupMenu(View view) {
+        PopupMenu menu=new PopupMenu(this,view);
+        MenuInflater menuInflater = menu.getMenuInflater();
+        menuInflater.inflate(R.menu.layout_menu,menu.getMenu());
 
-        menu.add(Menu.NONE,100,Menu.NONE,"添加样例");
-        menu.add(Menu.NONE,101,Menu.NONE,"清空数据");
+        menu.getMenu().add(Menu.NONE,100,Menu.NONE,"添加样例");
+        menu.getMenu().add(Menu.NONE,101,Menu.NONE,"清空数据");
 
-        return true;
+        menu.setOnMenuItemClickListener(this::onOptionsItemSelected);
+        menu.show();
     }
 
     @Override
