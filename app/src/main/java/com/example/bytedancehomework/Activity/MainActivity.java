@@ -11,6 +11,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.bytedancehomework.Enum.LayoutMode;
 import com.example.bytedancehomework.Item.FeedItem;
@@ -19,6 +20,7 @@ import com.example.bytedancehomework.R;
 import com.example.bytedancehomework.databinding.ActivityMainBinding;
 import com.example.bytedancehomework.tracker.ExposureTracker;
 
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -38,6 +40,8 @@ implements FlexibleAdapter.OnItemClickListener
     private ActivityMainBinding binding;
 
     private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
+
     private FlexibleAdapter adapter;
     private DatabaseHelper dbhelper;
     private List<FeedItem> items;
@@ -111,10 +115,19 @@ implements FlexibleAdapter.OnItemClickListener
     private void initRecycleView()
     {
         recyclerView = findViewById(R.id.recycleViewFeed);
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
 
         ImageButton menuButton = findViewById(R.id.buttonMenu);
         menuButton.setOnClickListener(v->{
             showPopupMenu(v);
+        });
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshData();
+            }
+
         });
 
         switchToSingleMode();
@@ -124,6 +137,20 @@ implements FlexibleAdapter.OnItemClickListener
 
         ExposureTracker exposureTracker    =new ExposureTracker();
         exposureTracker.startTrack(recyclerView,items);
+    }
+
+    private void refreshData() {
+        swipeRefreshLayout.setRefreshing(true);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                List<FeedItem> newitems=dbhelper.getAllFeedItems();
+                adapter.updateData(newitems);
+                items=newitems;
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        },2000);
     }
 
     //瀑布屏暂时不做
