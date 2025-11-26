@@ -1,5 +1,7 @@
 package com.example.bytedancehomework.Item;
 
+import com.example.bytedancehomework.Enum.LayoutMode;
+
 public class FeedItem {
     private long id; // 数据库主键
     private String title;
@@ -9,11 +11,12 @@ public class FeedItem {
     private int imageHeight;
     private long createdAt;
     private int isFavorite;
+    private LayoutMode layoutMode;
 
     public FeedItem() {
     }
 
-    public FeedItem(String title, String content, String imageUrl, int imageWidth, int imageHeight) {
+    public FeedItem(String title, String content, String imageUrl, int imageWidth, int imageHeight,LayoutMode layoutMode) {
         this.title = title;
         this.content = content;
         this.imageUrl = imageUrl;
@@ -21,6 +24,7 @@ public class FeedItem {
         this.imageHeight = imageHeight;
         this.createdAt = System.currentTimeMillis();
         this.isFavorite = 0;
+        this.layoutMode=layoutMode;
     }
 
     // Getter 方法
@@ -55,6 +59,7 @@ public class FeedItem {
     public int getIsFavorite() {
         return isFavorite;
     }
+    public LayoutMode getLayoutMode(){ return layoutMode;}
 
     public boolean isFavorite() {
         return isFavorite == 1;
@@ -98,6 +103,20 @@ public class FeedItem {
         this.isFavorite = favorite ? 1 : 0;
     }
 
+    public void setLayoutModeFromValue(int value) {
+        LayoutMode[] modes = LayoutMode.values();
+        if (value >= 0 && value < modes.length) {
+            this.layoutMode = modes[value];
+        } else {
+            this.layoutMode = LayoutMode.single; // 默认值
+        }
+    }
+
+    public void setLayoutMode(LayoutMode layoutMode)
+    {
+        this.layoutMode=layoutMode;
+    }
+
     @Override
     public String toString() {
         return "FeedItem{" +
@@ -109,6 +128,7 @@ public class FeedItem {
                 ", imageHeight=" + imageHeight +
                 ", createdAt=" + createdAt +
                 ", isFavorite=" + isFavorite +
+                ", layoutMode="+ layoutMode +
                 '}';
     }
 }

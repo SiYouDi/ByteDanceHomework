@@ -140,7 +140,7 @@ public class ExposureTracker {
     }
 
 
-    private int getScreenHeight(View view) {
+    private float getScreenHeight(View view) {
         DisplayMetrics metrics = view.getResources().getDisplayMetrics();
         return metrics.heightPixels;
     }

@@ -28,6 +28,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_IMAGE_HEIGHT = "image_height";
     public static final String COLUMN_CREATED_AT = "created_at";
     public static final String COLUMN_IS_FAVORITE = "is_favorite";
+    public static final String COLUMN_LAYOUT_MODE = "layout_mode";
 
     //创建表的信息
     private static final String CREATE_TABLE_FEED_ITEMS =
@@ -39,7 +40,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_IMAGE_WIDTH + " INTEGER DEFAULT 0, " +
                     COLUMN_IMAGE_HEIGHT + " INTEGER DEFAULT 0, " +
                     COLUMN_CREATED_AT + " INTEGER NOT NULL, " +
-                    COLUMN_IS_FAVORITE + " INTEGER DEFAULT 0" +
+                    COLUMN_IS_FAVORITE + " INTEGER DEFAULT 0," +
+                    COLUMN_LAYOUT_MODE + " INTEGER NOT NULL" +
                     ");";
 
     public DatabaseHelper(Context context)
@@ -79,6 +81,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_IMAGE_HEIGHT, item.getImageHeight());
         values.put(COLUMN_CREATED_AT, item.getCreatedAt());
         values.put(COLUMN_IS_FAVORITE, item.getIsFavorite());
+        values.put(COLUMN_LAYOUT_MODE,item.getLayoutMode().ordinal());
 
         long id = db.insert(TABLE_FEED_ITEMS,null,values);
         db.close();
@@ -136,10 +139,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_IMAGE_HEIGHT, item.getImageHeight());
         values.put(COLUMN_CREATED_AT, item.getCreatedAt());
         values.put(COLUMN_IS_FAVORITE, item.getIsFavorite());
+        values.put(COLUMN_LAYOUT_MODE, item.getLayoutMode().ordinal()); // 新增
 
         String selection = COLUMN_ID + " = ?";
         String[] selectionArgs = {String.valueOf(item.getId())};
         int count = db.update(TABLE_FEED_ITEMS,values,selection,selectionArgs);
+        db.close(); // 记得关闭数据库
 
         return count;
     }
@@ -165,6 +170,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values.put(COLUMN_IMAGE_HEIGHT, item.getImageHeight());
                 values.put(COLUMN_CREATED_AT, item.getCreatedAt());
                 values.put(COLUMN_IS_FAVORITE, item.getIsFavorite());
+                values.put(COLUMN_LAYOUT_MODE, item.getLayoutMode().ordinal()); // 新增
 
                 db.insert(TABLE_FEED_ITEMS, null, values);
             }
@@ -173,7 +179,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return true;
 
         } catch (Exception e) {
-            Log.e("update错误", "updateAll: ");
+            Log.e("update错误", "updateAll: ", e); // 改进错误日志
             return false;
         } finally {
             if (db != null) {
@@ -199,7 +205,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_IMAGE_WIDTH,
                 COLUMN_IMAGE_HEIGHT,
                 COLUMN_CREATED_AT,
-                COLUMN_IS_FAVORITE
+                COLUMN_IS_FAVORITE,
+                COLUMN_LAYOUT_MODE  // 新增
         };
 
         String selection =COLUMN_ID+" = ?";
@@ -221,6 +228,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 item.setImageHeight(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_HEIGHT)));
                 item.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
                 item.setIsFavorite(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_FAVORITE)));
+
+                // 新增：设置布局模式
+                int layoutModeValue = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LAYOUT_MODE));
+                item.setLayoutModeFromValue(layoutModeValue);
             }
             catch (Exception e)
             {
@@ -252,7 +263,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_IMAGE_WIDTH,
                 COLUMN_IMAGE_HEIGHT,
                 COLUMN_CREATED_AT,
-                COLUMN_IS_FAVORITE
+                COLUMN_IS_FAVORITE,
+                COLUMN_LAYOUT_MODE  // 新增
         };
 
         Cursor cursor = db.query(TABLE_FEED_ITEMS,
@@ -275,12 +287,73 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     item.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
                     item.setIsFavorite(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_FAVORITE)));
 
+                    // 新增：设置布局模式
+                    int layoutModeValue = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LAYOUT_MODE));
+                    item.setLayoutModeFromValue(layoutModeValue);
+
                     items.add(item);
                 } while (cursor.moveToNext());
             }catch (Exception e){
                 Log.e("SqlSearch", "getAllFeedItems: "+e.toString() );
             }
             finally {
+                cursor.close();
+            }
+        }
+        db.close();
+
+        return items;
+    }
+
+    public List<FeedItem> getFeedItemsByPage(int page,int pageSize)
+    {
+        List<FeedItem> items=new ArrayList<FeedItem>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns={
+                COLUMN_ID,
+                COLUMN_TITLE,
+                COLUMN_CONTENT,
+                COLUMN_IMAGE_URL,
+                COLUMN_IMAGE_WIDTH,
+                COLUMN_IMAGE_HEIGHT,
+                COLUMN_CREATED_AT,
+                COLUMN_IS_FAVORITE,
+                COLUMN_LAYOUT_MODE  // 新增
+        };
+
+        int offset = page*pageSize;
+        String limit= pageSize+" OFFSET "+offset;
+
+        Cursor cursor = db.query(
+                TABLE_FEED_ITEMS,
+                columns,
+                null, null, null, null,
+                COLUMN_CREATED_AT + " DESC",  // 按创建时间倒序
+                limit
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            try {
+                do {
+                    FeedItem item = new FeedItem();
+                    item.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID)));
+                    item.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)));
+                    item.setContent(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT)));
+                    item.setImageUrl(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_URL)));
+                    item.setImageWidth(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_WIDTH)));
+                    item.setImageHeight(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_HEIGHT)));
+                    item.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
+                    item.setIsFavorite(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_FAVORITE)));
+
+                    // 新增：设置布局模式
+                    int layoutModeValue = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LAYOUT_MODE));
+                    item.setLayoutModeFromValue(layoutModeValue);
+
+                    items.add(item);
+                } while (cursor.moveToNext());
+            } catch (Exception e) {
+                Log.e("DatabaseHelper", "getFeedItemsByPage error: " + e.toString());
+            } finally {
                 cursor.close();
             }
         }
@@ -305,7 +378,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_IMAGE_WIDTH,
                 COLUMN_IMAGE_HEIGHT,
                 COLUMN_CREATED_AT,
-                COLUMN_IS_FAVORITE
+                COLUMN_IS_FAVORITE,
+                COLUMN_LAYOUT_MODE  // 新增
         };
 
         String selection = COLUMN_IS_FAVORITE + " = ?";
@@ -332,6 +406,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     item.setImageHeight(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_HEIGHT)));
                     item.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
                     item.setIsFavorite(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_FAVORITE)));
+
+                    // 新增：设置布局模式
+                    int layoutModeValue = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LAYOUT_MODE));
+                    item.setLayoutModeFromValue(layoutModeValue);
 
                     items.add(item);
                 } while (cursor.moveToNext());

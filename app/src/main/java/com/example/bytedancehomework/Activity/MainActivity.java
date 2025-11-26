@@ -73,22 +73,22 @@ implements FlexibleAdapter.OnItemClickListener
         List<FeedItem> sampleItems = new ArrayList<>();
         sampleItems.add(new FeedItem("Android开发教程",
                 "学习如何使用RecyclerView和SQLite创建强大的Android应用",
-                "url1", 800, 600));
+                "url1", 800, 600,LayoutMode.single));
         sampleItems.add(new FeedItem("Material Design",
                 "Material Design是Google推出的设计语言，提供一致的用户体验",
-                "url2", 600, 800));
+                "url2", 600, 800,LayoutMode.single));
         sampleItems.add(new FeedItem("Kotlin vs Java",
                 "比较Kotlin和Java在Android开发中的优缺点",
-                "url3", 400, 300));
+                "url3", 400, 300,LayoutMode.single));
         sampleItems.add(new FeedItem("数据库优化",
                 "学习如何优化SQLite数据库查询性能",
-                null, 800, 400));
+                null, 800, 400,LayoutMode.single));
         sampleItems.add(new FeedItem("UI/UX设计",
                 "创建美观且易用的用户界面设计原则",
-                null, 300, 500));
+                null, 300, 500,LayoutMode.single));
         sampleItems.add(new FeedItem("性能调优",
                 "提升Android应用性能的技巧和最佳实践",
-                null, 700, 900));
+                null, 700, 900,LayoutMode.single));
 
         for (FeedItem item : sampleItems) {
             dbhelper.insertFeedItem(item);
@@ -135,7 +135,7 @@ implements FlexibleAdapter.OnItemClickListener
 
         adapter.setOnItemClickListener(this);
 
-        ExposureTracker exposureTracker    =new ExposureTracker();
+        ExposureTracker exposureTracker = new ExposureTracker();
         exposureTracker.startTrack(recyclerView,items);
     }
 
@@ -193,6 +193,7 @@ implements FlexibleAdapter.OnItemClickListener
         menu.show();
     }
 
+    //之后可以把menu类封装起来
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();

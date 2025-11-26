@@ -31,6 +31,8 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
     private static final int VIEW_TYPE_GRID = 2;
     private static final int VIEW_TYPE_STAGGERED = 3;
 
+    private final int PAGE_SIZE=10;
+
     //事件监听器
     public interface OnItemClickListener
     {
@@ -165,13 +167,6 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         notifyDataSetChanged();
     }
 
-    public void updateItem(int position,FeedItem item)
-    {
-        dbHelper.updateFeedItem(item);
-
-        items.set(position,item);
-        notifyItemChanged(position);
-    }
 
     public void updateData(List<FeedItem> newItems)
     {
@@ -179,6 +174,12 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         items=(ArrayList<FeedItem>) newItems;
         notifyDataSetChanged();
     }
+
+//    public List<FeedItem> getFeedItemsByPage(int page)
+//    {
+//        List<FeedItem> newItems=new ArrayList<FeedItem>();
+//        newItems=dbHelper.getFeedItemsByPage(page,PAGE_SIZE);
+//    }
 
     static class BaseViewHolder extends RecyclerView.ViewHolder
     {
