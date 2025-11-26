@@ -54,7 +54,13 @@ implements FlexibleAdapter.OnItemClickListener
         dbhelper=new DatabaseHelper(this);
 
         InitData();
+        initAdapter();
         initRecycleView();
+    }
+
+    private void initAdapter() {
+        adapter=new FlexibleAdapter(items, LayoutMode.single,dbhelper);
+        adapter.setOnItemClickListener(this);
     }
 
     private void InitData()
@@ -116,12 +122,17 @@ implements FlexibleAdapter.OnItemClickListener
     {
         recyclerView = findViewById(R.id.recycleViewFeed);
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+        recyclerView.setAdapter(adapter);
 
-        ImageButton menuButton = findViewById(R.id.buttonMenu);
-        menuButton.setOnClickListener(v->{
-            showPopupMenu(v);
-        });
+        //初始化监听器
+        initMenuButton();
+        initSwipeRefreshLayout();
+        initExposureTracker(recyclerView,items);
 
+        switchToSingleMode();
+    }
+
+    private void initSwipeRefreshLayout() {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -129,12 +140,14 @@ implements FlexibleAdapter.OnItemClickListener
             }
 
         });
+    }
 
-        switchToSingleMode();
-//        switchToGridMode();
+    private void initMenuButton() {
+        ImageButton menuButton = findViewById(R.id.buttonMenu);
+        menuButton.setOnClickListener(this::showPopupMenu);
+    }
 
-        adapter.setOnItemClickListener(this);
-
+    private void initExposureTracker(RecyclerView recyclerView, List<FeedItem> items) {
         ExposureTracker exposureTracker = new ExposureTracker();
         exposureTracker.startTrack(recyclerView,items);
     }
@@ -157,9 +170,8 @@ implements FlexibleAdapter.OnItemClickListener
     private void switchToSingleMode() {
         LinearLayoutManager layoutManager=new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        if(adapter==null)
+        if(recyclerView.getAdapter()==null)
         {
-            adapter=new FlexibleAdapter(items, LayoutMode.single,dbhelper);
             recyclerView.setAdapter(adapter);
         }
         else
@@ -170,9 +182,8 @@ implements FlexibleAdapter.OnItemClickListener
     private void switchToGridMode(){
         GridLayoutManager layoutManager = new GridLayoutManager(this,2);
         recyclerView.setLayoutManager(layoutManager);
-        if(adapter==null)
+        if(recyclerView.getAdapter()==null)
         {
-            adapter = new FlexibleAdapter(items,LayoutMode.grid,dbhelper);
             recyclerView.setAdapter(adapter);
         }
         else

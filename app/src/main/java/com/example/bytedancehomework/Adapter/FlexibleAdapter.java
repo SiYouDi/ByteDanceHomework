@@ -1,6 +1,7 @@
 package com.example.bytedancehomework.Adapter;
 
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -144,7 +145,7 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
                 "新项目 " + System.currentTimeMillis(),
                 "这是通过菜单添加的新项目内容",
                 "new_url",
-                500, 400
+                500, 400,LayoutMode.single
         );
         addItem(newItem);
     }
@@ -173,6 +174,31 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         dbHelper.updateAll(newItems);
         items=(ArrayList<FeedItem>) newItems;
         notifyDataSetChanged();
+    }
+
+    public void updateItem(int position, FeedItem newItem)
+    {
+        // 参数检查
+        if (position < 0 || position >= items.size()) {
+            Log.e("FlexibleAdapter", "updateItem: 位置越界 - " + position);
+            return;
+        }
+
+        if (newItem == null) {
+            Log.e("FlexibleAdapter", "updateItem: newItem 为 null");
+            return;
+        }
+
+        // 更新数据库
+        int rowsAffected = dbHelper.updateFeedItem(newItem);
+        if (rowsAffected > 0) {
+            // 更新内存中的列表
+            items.set(position, newItem);
+            // 通知适配器该位置的数据发生变化
+            notifyItemChanged(position);
+        } else {
+            Log.e("FlexibleAdapter", "updateItem: 数据库更新失败");
+        }
     }
 
 //    public List<FeedItem> getFeedItemsByPage(int page)

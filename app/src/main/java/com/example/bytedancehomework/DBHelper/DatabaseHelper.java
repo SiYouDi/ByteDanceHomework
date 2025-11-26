@@ -144,6 +144,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String selection = COLUMN_ID + " = ?";
         String[] selectionArgs = {String.valueOf(item.getId())};
         int count = db.update(TABLE_FEED_ITEMS,values,selection,selectionArgs);
+        Log.d("dbHelper", "updateFeedItem: "+count);
         db.close(); // 记得关闭数据库
 
         return count;
