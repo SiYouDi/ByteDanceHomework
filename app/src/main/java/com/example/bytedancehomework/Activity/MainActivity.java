@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
@@ -35,13 +36,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListener
+implements FlexibleAdapter.OnItemClickListener,
+        FlexibleAdapter.OnLoadMoreListener,
+        FlexibleAdapter.OnShowLoadMoreButtonListener
 {
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ProgressBar progressBarLoadMore;
     private ExposureTracker exposureTracker;
+    private Button lordMoreButton;
 
     private FlexibleAdapter adapter;
     private DatabaseHelper dbhelper;
@@ -63,6 +67,7 @@ implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListene
         adapter=new FlexibleAdapter(this,new ArrayList<>(), LayoutMode.single,dbhelper);
         adapter.setOnItemClickListener(this);
         adapter.setOnLoadMoreListener(this);
+        adapter.setOnShowLoadMoreButtonListener(this);
     }
 
     private void InitData()
@@ -131,6 +136,22 @@ implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListene
         initMenuButton();
         initSwipeRefreshLayout();
         initExposureTracker();
+        initLoarMoreButton();
+    }
+
+    private void initLoarMoreButton() {
+        lordMoreButton =findViewById(R.id.buttonLoadMore);
+        lordMoreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!adapter.isLoading()&&adapter.hasMore())
+                {
+                    adapter.loadNextPage();
+//                    lordMoreButton.setVisibility(View.GONE);
+                }
+
+            }
+        });
     }
 
     private void initExposureTracker() {
@@ -155,7 +176,7 @@ implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListene
 
     private void refreshData() {
         swipeRefreshLayout.setRefreshing(true);
-
+        lordMoreButton.setVisibility(View.GONE);
         adapter.refreshData();
     }
 
@@ -276,6 +297,7 @@ implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListene
     public void onLoadComplete(List<FeedItem> newItems) {
         swipeRefreshLayout.setRefreshing(false);
         progressBarLoadMore.setVisibility(View.GONE);
+        lordMoreButton.setVisibility(View.GONE);
 
         Log.d("MainActivity", "加载完成，新增 " + newItems.size() + " 条数据");
     }
@@ -283,5 +305,29 @@ implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListene
     @Override
     public void onLoadError(String error) {
 
+    }
+
+    @Override
+    public void onShouldShowLoadMoreButton() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (lordMoreButton != null && adapter != null && adapter.hasMore() && !adapter.isLoading()) {
+                    lordMoreButton.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onShouldHideLoadMoreButton() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (lordMoreButton != null) {
+                    lordMoreButton.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 }

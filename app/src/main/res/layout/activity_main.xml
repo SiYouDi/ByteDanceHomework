@@ -27,27 +27,47 @@
     <!-- RecyclerView，设置 behavior 使其与 AppBarLayout 联动 -->
     <!-- 添加下拉刷新布局 -->
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycleViewFeed"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycleViewFeed"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <!-- ProgressBar放在RelativeLayout中，确保在最上层 -->
         <ProgressBar
             android:id="@+id/progressBarLoadMore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:layout_margin="16dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_centerInParent="true"
             android:visibility="gone"
-            android:background="@color/black"
+            android:indeterminateTint="@color/white"
+            android:background="@drawable/progress_bar_background"
+            android:elevation="8dp"
             />
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonLoadMore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="16dp"
+            android:text="加载更多"
+            android:visibility="gone"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            app:iconGravity="textStart" />
+
+    </RelativeLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

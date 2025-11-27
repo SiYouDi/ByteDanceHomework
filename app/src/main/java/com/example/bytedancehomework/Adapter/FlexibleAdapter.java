@@ -42,6 +42,17 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
     private boolean hasMore = true;
 
     private long DELAY_TIME =2000;
+    private OnShowLoadMoreButtonListener showLoadMoreButtonListener;
+
+    public boolean isLoading()
+    {
+        return isLoading;
+    }
+
+    public boolean hasMore()
+    {
+        return hasMore;
+    }
 
     public int getPosition(FeedItem item) {
         int position = items.indexOf(item);
@@ -62,6 +73,11 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         void onLoadError(String error);
     }
 
+    public interface OnShowLoadMoreButtonListener {
+        void onShouldShowLoadMoreButton();
+        void onShouldHideLoadMoreButton();
+    }
+
     public FlexibleAdapter(Activity activity,List<FeedItem>items,LayoutMode layoutMode,DatabaseHelper dbHelper)
     {
         this.activity=activity;
@@ -78,6 +94,10 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
     public void setOnLoadMoreListener(OnLoadMoreListener listener)
     {
         this.loadMoreListener =listener;
+    }
+
+    public void setOnShowLoadMoreButtonListener(OnShowLoadMoreButtonListener listener) {
+        this.showLoadMoreButtonListener = listener;
     }
 
     @Override
@@ -116,10 +136,24 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         FeedItem item=items.get(position);
         holder.bind(item);
 
-        if(position>=getItemCount()-1&&!isLoading&&hasMore)
+        if(position >= getItemCount() - 2 && hasMore && !isLoading && showLoadMoreButtonListener != null)
         {
-            holder.itemView.removeCallbacks(loadMoreRunnable);
-            holder.itemView.postDelayed(loadMoreRunnable,DELAY_TIME);
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("Adapter", "onBindViewHolder: 显示加载更多按钮");
+                    showLoadMoreButtonListener.onShouldShowLoadMoreButton();
+                }
+            });
+        }
+        if (position < getItemCount() - 2 && showLoadMoreButtonListener != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("Adapter", "onBindViewHolder: 隐藏加载更多按钮");
+                    showLoadMoreButtonListener.onShouldHideLoadMoreButton();
+                }
+            });
         }
 
         //设置系统监听器
@@ -139,15 +173,15 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         });
     }
 
-    private Runnable loadMoreRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if(!isLoading&&hasMore)
-            {
-                loadNextPage();
-            }
-        }
-    };
+//    private Runnable loadMoreRunnable = new Runnable() {
+//        @Override
+//        public void run() {
+//            if(!isLoading&&hasMore)
+//            {
+//                loadNextPage();
+//            }
+//        }
+//    };
 
     public void loadNextPage() {
         if(isLoading||!hasMore)
