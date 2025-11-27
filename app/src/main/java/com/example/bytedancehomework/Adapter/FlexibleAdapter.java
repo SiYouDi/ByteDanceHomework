@@ -41,6 +41,8 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
     private boolean isLoading = false;
     private boolean hasMore = true;
 
+    private long DELAY_TIME =2000;
+
     //事件监听器
     public interface OnItemClickListener
     {
@@ -109,8 +111,11 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         FeedItem item=items.get(position);
         holder.bind(item);
 
-        if(position>=getItemCount()-3&&!isLoading&&hasMore)
-            loadNextPage();
+        if(position>=getItemCount()-1&&!isLoading&&hasMore)
+        {
+            holder.itemView.removeCallbacks(loadMoreRunnable);
+            holder.itemView.postDelayed(loadMoreRunnable,DELAY_TIME);
+        }
 
         //设置系统监听器
         holder.itemView.setOnClickListener(v->{
@@ -128,6 +133,16 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
             return false;
         });
     }
+
+    private Runnable loadMoreRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if(!isLoading&&hasMore)
+            {
+                loadNextPage();
+            }
+        }
+    };
 
     public void loadNextPage() {
         if(isLoading||!hasMore)
