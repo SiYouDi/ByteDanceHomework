@@ -126,7 +126,7 @@ implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListene
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         recyclerView.setAdapter(adapter);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        setupMixedLayout();
 
         //初始化监听器
         initMenuButton();
@@ -172,7 +172,26 @@ implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListene
         adapter.switchLayoutMode(LayoutMode.grid);
     }
 
+    private void setupMixedLayout()
+    {
+        GridLayoutManager layoutManager = new GridLayoutManager(this,2);
 
+        layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if(adapter!=null&& position<adapter.getItemCount())
+                {
+                    FeedItem item =adapter.getItemAt(position);
+                    if(item!=null)
+                    {
+                        return item.getLayoutMode()==LayoutMode.single?2:1;
+                    }
+                }
+                return 1;
+            }
+        });
+        recyclerView.setLayoutManager(layoutManager);
+    }
 
     public void showPopupMenu(View view) {
         PopupMenu menu=new PopupMenu(this,view);
