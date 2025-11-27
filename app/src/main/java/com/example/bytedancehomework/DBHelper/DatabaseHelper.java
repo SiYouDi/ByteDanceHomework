@@ -1,3 +1,4 @@
+// DatabaseHelper.java
 package com.example.bytedancehomework.DBHelper;
 
 import android.content.ContentValues;
@@ -13,8 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-
-    //数据库信息
+    // 数据库信息
     private static final String DATABASE_NAME = "feed_app.db";
     private static final int DATABASE_VERSION = 1;
 
@@ -30,7 +30,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_IS_FAVORITE = "is_favorite";
     public static final String COLUMN_LAYOUT_MODE = "layout_mode";
 
-    //创建表的信息
+    // 创建表的SQL语句
     private static final String CREATE_TABLE_FEED_ITEMS =
             "CREATE TABLE " + TABLE_FEED_ITEMS + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -44,135 +44,100 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_LAYOUT_MODE + " INTEGER NOT NULL" +
                     ");";
 
-    public DatabaseHelper(Context context)
-    {
+    // 查询列数组
+    private static final String[] ALL_COLUMNS = {
+            COLUMN_ID,
+            COLUMN_TITLE,
+            COLUMN_CONTENT,
+            COLUMN_IMAGE_URL,
+            COLUMN_IMAGE_WIDTH,
+            COLUMN_IMAGE_HEIGHT,
+            COLUMN_CREATED_AT,
+            COLUMN_IS_FAVORITE,
+            COLUMN_LAYOUT_MODE
+    };
+
+    // ==================== 构造方法 ====================
+
+    public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    //第一次调用数据库是创建
+    // ==================== 数据库生命周期方法 ====================
+
     @Override
-    public void onCreate(SQLiteDatabase db)
-    {
+    public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_FEED_ITEMS);
     }
 
-    //版本升级功能较为简单：删库重建。后续考虑升级
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
-    {
-        db.execSQL("DROP TABLE IF EXISTS "+TABLE_FEED_ITEMS);
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FEED_ITEMS);
         onCreate(db);
     }
 
-    /*
-    插入新的FeedItem到数据库
-    @param item:要插入的新数据
-    @return 返回新插入数据在数据库中的ID，插入失败则返回-1
-     */
-    public long insertFeedItem(FeedItem item)
-    {
-        SQLiteDatabase db=this.getWritableDatabase();
-        ContentValues values = new ContentValues();
+    // ==================== 数据插入方法 ====================
 
-        values.put(COLUMN_TITLE,item.getTitle());
-        values.put(COLUMN_CONTENT, item.getContent());
-        values.put(COLUMN_IMAGE_URL, item.getImageUrl());
-        values.put(COLUMN_IMAGE_WIDTH, item.getImageWidth());
-        values.put(COLUMN_IMAGE_HEIGHT, item.getImageHeight());
-        values.put(COLUMN_CREATED_AT, item.getCreatedAt());
-        values.put(COLUMN_IS_FAVORITE, item.getIsFavorite());
-        values.put(COLUMN_LAYOUT_MODE,item.getLayoutMode().ordinal());
+    public long insertFeedItem(FeedItem item) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = createContentValues(item);
 
-        long id = db.insert(TABLE_FEED_ITEMS,null,values);
+        long id = db.insert(TABLE_FEED_ITEMS, null, values);
         db.close();
 
         return id;
     }
 
-    /*
-    删除指定id的元素
-    @param 要删除元素的id
-    @return 被删除的行数，0表示没有找到匹配的记录
-     */
-    public int deleteFeedItem(long id)
-    {
+    // ==================== 数据删除方法 ====================
+
+    public int deleteFeedItem(long id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         String selection = COLUMN_ID + " = ?";
         String[] selectionArgs = {String.valueOf(id)};
 
-        int count= db.delete(TABLE_FEED_ITEMS,selection,selectionArgs);
+        int count = db.delete(TABLE_FEED_ITEMS, selection, selectionArgs);
         db.close();
 
         return count;
     }
 
-    /*
-    删除所有元素
-    @return 被删除的行数，0表示没有找到匹配的记录
-     */
-    public int deleteData()
-    {
-        SQLiteDatabase db =this.getWritableDatabase();
-
-        int count=db.delete(TABLE_FEED_ITEMS,null,null);
-        db.close();
-
-        return count;
-    }
-
-    /*
-
-    修改对应的FeedItem
-    @param item:修改后的FeedItem
-    @return 被修改的行数，0表示没有找到匹配的记录
-     */
-    public int updateFeedItem(FeedItem item)
-    {
+    public int deleteData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
+        int count = db.delete(TABLE_FEED_ITEMS, null, null);
+        db.close();
 
-        values.put(COLUMN_TITLE, item.getTitle());
-        values.put(COLUMN_CONTENT, item.getContent());
-        values.put(COLUMN_IMAGE_URL, item.getImageUrl());
-        values.put(COLUMN_IMAGE_WIDTH, item.getImageWidth());
-        values.put(COLUMN_IMAGE_HEIGHT, item.getImageHeight());
-        values.put(COLUMN_CREATED_AT, item.getCreatedAt());
-        values.put(COLUMN_IS_FAVORITE, item.getIsFavorite());
-        values.put(COLUMN_LAYOUT_MODE, item.getLayoutMode().ordinal()); // 新增
+        return count;
+    }
+
+    // ==================== 数据更新方法 ====================
+
+    public int updateFeedItem(FeedItem item) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = createContentValues(item);
 
         String selection = COLUMN_ID + " = ?";
         String[] selectionArgs = {String.valueOf(item.getId())};
-        int count = db.update(TABLE_FEED_ITEMS,values,selection,selectionArgs);
-        Log.d("dbHelper", "updateFeedItem: "+count);
-        db.close(); // 记得关闭数据库
+
+        int count = db.update(TABLE_FEED_ITEMS, values, selection, selectionArgs);
+        Log.d("dbHelper", "updateFeedItem: " + count);
+        db.close();
 
         return count;
     }
 
-    public boolean updateAll(List<FeedItem> items)
-    {
+    public boolean updateAll(List<FeedItem> items) {
         SQLiteDatabase db = null;
         try {
             db = getWritableDatabase();
             db.beginTransaction();
 
-            // 1. 清空旧数据
+            // 清空旧数据
             db.delete(TABLE_FEED_ITEMS, null, null);
 
-            // 2. 插入新数据
+            // 插入新数据
             for (FeedItem item : items) {
-                ContentValues values = new ContentValues();
-
-                values.put(COLUMN_TITLE, item.getTitle());
-                values.put(COLUMN_CONTENT, item.getContent());
-                values.put(COLUMN_IMAGE_URL, item.getImageUrl());
-                values.put(COLUMN_IMAGE_WIDTH, item.getImageWidth());
-                values.put(COLUMN_IMAGE_HEIGHT, item.getImageHeight());
-                values.put(COLUMN_CREATED_AT, item.getCreatedAt());
-                values.put(COLUMN_IS_FAVORITE, item.getIsFavorite());
-                values.put(COLUMN_LAYOUT_MODE, item.getLayoutMode().ordinal()); // 新增
-
+                ContentValues values = createContentValues(item);
                 db.insert(TABLE_FEED_ITEMS, null, values);
             }
 
@@ -180,7 +145,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return true;
 
         } catch (Exception e) {
-            Log.e("update错误", "updateAll: ", e); // 改进错误日志
+            Log.e("update错误", "updateAll: ", e);
             return false;
         } finally {
             if (db != null) {
@@ -190,239 +155,135 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    /*
-    通过id查找对应的FeedItem并返回
-    @param id:想要查找的FeedItem的id
-    @return id对应的FeedItem，null表示没有匹配的记录
-     */
-    public FeedItem getFeedItemById(long id)
-    {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns={
-                COLUMN_ID,
-                COLUMN_TITLE,
-                COLUMN_CONTENT,
-                COLUMN_IMAGE_URL,
-                COLUMN_IMAGE_WIDTH,
-                COLUMN_IMAGE_HEIGHT,
-                COLUMN_CREATED_AT,
-                COLUMN_IS_FAVORITE,
-                COLUMN_LAYOUT_MODE  // 新增
-        };
+    // ==================== 数据查询方法 ====================
 
-        String selection =COLUMN_ID+" = ?";
+    public FeedItem getFeedItemById(long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String selection = COLUMN_ID + " = ?";
         String[] selectionArgs = {String.valueOf(id)};
 
-        Cursor cursor =db.query(TABLE_FEED_ITEMS,columns,selection,selectionArgs,null,null,null);
+        Cursor cursor = db.query(TABLE_FEED_ITEMS, ALL_COLUMNS, selection, selectionArgs, null, null, null);
 
-        FeedItem item=null;
-        if(cursor!=null&&cursor.moveToFirst())
-        {
-            try
-            {
-                item=new FeedItem();
-                item.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID)));
-                item.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)));
-                item.setContent(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT)));
-                item.setImageUrl(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_URL)));
-                item.setImageWidth(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_WIDTH)));
-                item.setImageHeight(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_HEIGHT)));
-                item.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
-                item.setIsFavorite(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_FAVORITE)));
-
-                // 新增：设置布局模式
-                int layoutModeValue = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LAYOUT_MODE));
-                item.setLayoutModeFromValue(layoutModeValue);
-            }
-            catch (Exception e)
-            {
-                Log.e("SqlSearch", "getFeedItemById: "+e.toString() );
-            }
-            finally {
-                cursor.close();
-            }
-
-        }
+        FeedItem item = extractFeedItemFromCursor(cursor);
         db.close();
 
         return item;
     }
 
-    /*
-    返回数据库中所有FeedItem
-    @return 数据库中所有FeedItem
-     */
-    public List<FeedItem> getAllFeedItems()
-    {
-        List<FeedItem> items= new ArrayList<FeedItem>();
+    public List<FeedItem> getAllFeedItems() {
+        List<FeedItem> items = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns={
-                COLUMN_ID,
-                COLUMN_TITLE,
-                COLUMN_CONTENT,
-                COLUMN_IMAGE_URL,
-                COLUMN_IMAGE_WIDTH,
-                COLUMN_IMAGE_HEIGHT,
-                COLUMN_CREATED_AT,
-                COLUMN_IS_FAVORITE,
-                COLUMN_LAYOUT_MODE  // 新增
-        };
 
         Cursor cursor = db.query(TABLE_FEED_ITEMS,
-                columns,
-                null,null,null,null,
+                ALL_COLUMNS,
+                null, null, null, null,
                 COLUMN_CREATED_AT + " DESC");
 
-        if(cursor!=null && cursor.moveToFirst())
-        {
-            try
-            {
-                do {
-                    FeedItem item = new FeedItem();
-                    item.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID)));
-                    item.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)));
-                    item.setContent(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT)));
-                    item.setImageUrl(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_URL)));
-                    item.setImageWidth(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_WIDTH)));
-                    item.setImageHeight(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_HEIGHT)));
-                    item.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
-                    item.setIsFavorite(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_FAVORITE)));
-
-                    // 新增：设置布局模式
-                    int layoutModeValue = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LAYOUT_MODE));
-                    item.setLayoutModeFromValue(layoutModeValue);
-
-                    items.add(item);
-                } while (cursor.moveToNext());
-            }catch (Exception e){
-                Log.e("SqlSearch", "getAllFeedItems: "+e.toString() );
-            }
-            finally {
-                cursor.close();
-            }
-        }
+        extractFeedItemsFromCursor(cursor, items);
         db.close();
 
         return items;
     }
 
-    public List<FeedItem> getFeedItemsByPage(int page,int pageSize)
-    {
-        List<FeedItem> items=new ArrayList<FeedItem>();
+    public List<FeedItem> getFeedItemsByPage(int page, int pageSize) {
+        List<FeedItem> items = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns={
-                COLUMN_ID,
-                COLUMN_TITLE,
-                COLUMN_CONTENT,
-                COLUMN_IMAGE_URL,
-                COLUMN_IMAGE_WIDTH,
-                COLUMN_IMAGE_HEIGHT,
-                COLUMN_CREATED_AT,
-                COLUMN_IS_FAVORITE,
-                COLUMN_LAYOUT_MODE  // 新增
-        };
 
-        int offset = page*pageSize;
-        String limit= pageSize+" OFFSET "+offset;
+        int offset = page * pageSize;
+        String limit = pageSize + " OFFSET " + offset;
 
         Cursor cursor = db.query(
                 TABLE_FEED_ITEMS,
-                columns,
+                ALL_COLUMNS,
                 null, null, null, null,
-                COLUMN_CREATED_AT + " DESC",  // 按创建时间倒序
+                COLUMN_CREATED_AT + " DESC",
                 limit
         );
 
-        if (cursor != null && cursor.moveToFirst()) {
-            try {
-                do {
-                    FeedItem item = new FeedItem();
-                    item.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID)));
-                    item.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)));
-                    item.setContent(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT)));
-                    item.setImageUrl(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_URL)));
-                    item.setImageWidth(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_WIDTH)));
-                    item.setImageHeight(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_HEIGHT)));
-                    item.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
-                    item.setIsFavorite(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_FAVORITE)));
-
-                    // 新增：设置布局模式
-                    int layoutModeValue = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LAYOUT_MODE));
-                    item.setLayoutModeFromValue(layoutModeValue);
-
-                    items.add(item);
-                } while (cursor.moveToNext());
-            } catch (Exception e) {
-                Log.e("DatabaseHelper", "getFeedItemsByPage error: " + e.toString());
-            } finally {
-                cursor.close();
-            }
-        }
+        extractFeedItemsFromCursor(cursor, items);
         db.close();
 
         return items;
     }
 
-    /*
-    返回数据库中所有Favorite为1的FeedItem
-    @return 数据库中所有Favorite为1的FeedItem
-     */
     public List<FeedItem> getFavoriteFeedItems() {
         List<FeedItem> items = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
-        String[] columns = {
-                COLUMN_ID,
-                COLUMN_TITLE,
-                COLUMN_CONTENT,
-                COLUMN_IMAGE_URL,
-                COLUMN_IMAGE_WIDTH,
-                COLUMN_IMAGE_HEIGHT,
-                COLUMN_CREATED_AT,
-                COLUMN_IS_FAVORITE,
-                COLUMN_LAYOUT_MODE  // 新增
-        };
-
         String selection = COLUMN_IS_FAVORITE + " = ?";
-        String[] selectionArgs = { "1" };
+        String[] selectionArgs = {"1"};
 
         Cursor cursor = db.query(
                 TABLE_FEED_ITEMS,
-                columns,
+                ALL_COLUMNS,
                 selection, selectionArgs, null, null,
                 COLUMN_CREATED_AT + " DESC"
         );
 
-        if(cursor!=null && cursor.moveToFirst())
-        {
-            try
-            {
-                do {
-                    FeedItem item = new FeedItem();
-                    item.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID)));
-                    item.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)));
-                    item.setContent(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT)));
-                    item.setImageUrl(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_URL)));
-                    item.setImageWidth(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_WIDTH)));
-                    item.setImageHeight(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_HEIGHT)));
-                    item.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
-                    item.setIsFavorite(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_FAVORITE)));
-
-                    // 新增：设置布局模式
-                    int layoutModeValue = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LAYOUT_MODE));
-                    item.setLayoutModeFromValue(layoutModeValue);
-
-                    items.add(item);
-                } while (cursor.moveToNext());
-            }catch (Exception e){
-                Log.e("SqlSearch", "getAllFeedItems: "+e.toString() );
-            }
-            finally {
-                cursor.close();
-            }
-        }
+        extractFeedItemsFromCursor(cursor, items);
         db.close();
+
         return items;
     }
 
+    // ==================== 工具方法 ====================
+
+    private ContentValues createContentValues(FeedItem item) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_TITLE, item.getTitle());
+        values.put(COLUMN_CONTENT, item.getContent());
+        values.put(COLUMN_IMAGE_URL, item.getImageUrl());
+        values.put(COLUMN_IMAGE_WIDTH, item.getImageWidth());
+        values.put(COLUMN_IMAGE_HEIGHT, item.getImageHeight());
+        values.put(COLUMN_CREATED_AT, item.getCreatedAt());
+        values.put(COLUMN_IS_FAVORITE, item.getIsFavorite());
+        values.put(COLUMN_LAYOUT_MODE, item.getLayoutMode().ordinal());
+        return values;
+    }
+
+    private FeedItem extractFeedItemFromCursor(Cursor cursor) {
+        FeedItem item = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            try {
+                item = new FeedItem();
+                populateFeedItemFromCursor(cursor, item);
+            } catch (Exception e) {
+                Log.e("SqlSearch", "getFeedItemById: " + e.toString());
+            } finally {
+                cursor.close();
+            }
+        }
+        return item;
+    }
+
+    private void extractFeedItemsFromCursor(Cursor cursor, List<FeedItem> items) {
+        if (cursor != null && cursor.moveToFirst()) {
+            try {
+                do {
+                    FeedItem item = new FeedItem();
+                    populateFeedItemFromCursor(cursor, item);
+                    items.add(item);
+                } while (cursor.moveToNext());
+            } catch (Exception e) {
+                Log.e("SqlSearch", "getAllFeedItems: " + e.toString());
+            } finally {
+                cursor.close();
+            }
+        }
+    }
+
+    private void populateFeedItemFromCursor(Cursor cursor, FeedItem item) {
+        item.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID)));
+        item.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)));
+        item.setContent(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT)));
+        item.setImageUrl(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_URL)));
+        item.setImageWidth(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_WIDTH)));
+        item.setImageHeight(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_HEIGHT)));
+        item.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
+        item.setIsFavorite(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_FAVORITE)));
+
+        int layoutModeValue = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LAYOUT_MODE));
+        item.setLayoutModeFromValue(layoutModeValue);
+    }
 }
