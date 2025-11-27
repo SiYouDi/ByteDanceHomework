@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.bytedancehomework.Adapter.FlexibleAdapter;
 import com.example.bytedancehomework.Item.FeedItem;
 
 import java.util.HashMap;
@@ -21,8 +22,19 @@ public class ExposureTracker {
     private long lastCheckTime=0;
     private static final long CHECK_INTERVAL=50;
 
-    public void startTrack(RecyclerView recyclerView, List<FeedItem> items)
+    private RecyclerView recyclerView;
+    private FlexibleAdapter adapter;
+    private RecyclerView.AdapterDataObserver dataObserver;
+    private boolean isTracking = false;
+
+    public void startTrack(RecyclerView recyclerView, FlexibleAdapter adapter)
     {
+        isTracking=true;
+        this.recyclerView=recyclerView;
+        this.adapter=adapter;
+
+        registerDataObserver();
+
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -30,29 +42,86 @@ public class ExposureTracker {
                 if(currentCheckTime-lastCheckTime>=CHECK_INTERVAL)
                 {
                     super.onScrolled(recyclerView, dx, dy);
-                    checkAllVisibleItems(recyclerView,items);
+                    checkAllVisibleItems();
                     lastCheckTime=currentCheckTime;
                 }
             }
-
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
 
                 if(newState==RecyclerView.SCROLL_STATE_IDLE)
                 {
-                    checkAllVisibleItems(recyclerView,items);
+                    checkAllVisibleItems();
                 }
             }
-
-
         });
-
-        recyclerView.post(()->checkAllVisibleItems(recyclerView,items));
+        recyclerView.post(()->checkAllVisibleItems());
     }
-    private void checkAllVisibleItems(RecyclerView recyclerView, List<FeedItem> items) {
-        if(items==null|| items.isEmpty())
+
+    public void stopTrack() {
+        if (!isTracking) return;
+
+        isTracking = false;
+
+        // 移除数据监听器
+        if (adapter != null && dataObserver != null) {
+            adapter.unregisterAdapterDataObserver(dataObserver);
+            dataObserver = null;
+        }
+
+        // 移除滚动监听
+        if (recyclerView != null) {
+            recyclerView.clearOnScrollListeners();
+        }
+
+        // 清理状态
+        itemExposureStage.clear();
+        recyclerView = null;
+        adapter = null;
+    }
+
+    private void registerDataObserver() {
+        if(adapter==null)
             return;
+
+        dataObserver=new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                // 新数据插入时重新检查曝光
+                recyclerView.post(() -> checkAllVisibleItems());
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                // 数据删除时重新检查曝光
+                recyclerView.post(() -> checkAllVisibleItems());
+            }
+
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount) {
+                // 数据变化时重新检查曝光
+                recyclerView.post(() -> checkAllVisibleItems());
+            }
+
+            @Override
+            public void onChanged() {
+                // 数据全部更新时重新检查曝光
+                recyclerView.post(() -> checkAllVisibleItems());
+            }
+        };
+
+        adapter.registerAdapterDataObserver(dataObserver);
+    }
+
+    private void checkAllVisibleItems() {
+        if(!isTracking || recyclerView==null || adapter==null)
+            return;
+
+        List<FeedItem> items=adapter.getAllFeedItems();
+        if (items == null || items.isEmpty()) {
+            return;
+        }
 
         LinearLayoutManager linearLayoutManager =(LinearLayoutManager) recyclerView.getLayoutManager();
         if(linearLayoutManager==null)   return;

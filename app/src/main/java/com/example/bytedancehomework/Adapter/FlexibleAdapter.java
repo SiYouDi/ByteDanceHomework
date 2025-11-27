@@ -1,6 +1,8 @@
 package com.example.bytedancehomework.Adapter;
 
 
+import android.app.Activity;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,12 +29,17 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
     DatabaseHelper dbHelper;
     LayoutMode layoutMode;
     OnItemClickListener itemClickListener;
+    OnLoadMoreListener loadMoreListener;
+    Activity activity;
 
-    private static final int VIEW_TYPE_SINGLE = 1;
-    private static final int VIEW_TYPE_GRID = 2;
-    private static final int VIEW_TYPE_STAGGERED = 3;
+    private static final int VIEW_TYPE_SINGLE = 0;
+    private static final int VIEW_TYPE_GRID = 1;
+    private static final int VIEW_TYPE_STAGGERED = 2;
 
-    private final int PAGE_SIZE=10;
+    private final int PAGE_SIZE=5;
+    private int currentPage=0;
+    private boolean isLoading = false;
+    private boolean hasMore = true;
 
     //事件监听器
     public interface OnItemClickListener
@@ -41,8 +48,16 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         void onItemLongClick(FeedItem item);
     }
 
-    public FlexibleAdapter(List<FeedItem>items,LayoutMode layoutMode,DatabaseHelper dbHelper)
+    public interface OnLoadMoreListener
     {
+        void onLoadMoreStarted();
+        void onLoadComplete(List<FeedItem> newItems);
+        void onLoadError(String error);
+    }
+
+    public FlexibleAdapter(Activity activity,List<FeedItem>items,LayoutMode layoutMode,DatabaseHelper dbHelper)
+    {
+        this.activity=activity;
         this.items=items;
         this.layoutMode=layoutMode;
         this.dbHelper=dbHelper;
@@ -51,6 +66,11 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
     public void setOnItemClickListener(OnItemClickListener listener)
     {
         this.itemClickListener=listener;
+    }
+
+    public void setOnLoadMoreListener(OnLoadMoreListener listener)
+    {
+        this.loadMoreListener =listener;
     }
 
     @Override
@@ -89,6 +109,9 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         FeedItem item=items.get(position);
         holder.bind(item);
 
+        if(position>=getItemCount()-3&&!isLoading&&hasMore)
+            loadNextPage();
+
         //设置系统监听器
         holder.itemView.setOnClickListener(v->{
             if(itemClickListener!=null)
@@ -104,6 +127,70 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
             }
             return false;
         });
+    }
+
+    public void loadNextPage() {
+        if(isLoading||!hasMore)
+            return;
+
+        isLoading=true;
+
+        if (loadMoreListener != null) {
+            loadMoreListener.onLoadMoreStarted();
+        }
+
+        new Thread(()->{
+            try {
+                List<FeedItem> newItems= dbHelper.getFeedItemsByPage(currentPage,PAGE_SIZE);
+
+                activity.runOnUiThread(()->{
+                    try {
+                        if(newItems!=null && !newItems.isEmpty()) {
+                            if(newItems.size() < PAGE_SIZE) {
+                                hasMore = false;
+                            }
+
+                            int startPosition = items.size();
+                            items.addAll(newItems);
+                            notifyItemRangeInserted(startPosition, newItems.size());
+                            currentPage++;
+                        } else {
+                            // 如果没有数据，也认为没有更多数据了
+                            hasMore = false;
+                        }
+
+                        isLoading = false;
+
+                        if(loadMoreListener != null) {
+                            loadMoreListener.onLoadComplete(newItems != null ? newItems : new ArrayList<>());
+                        }
+                    } catch (Exception e) {
+                        isLoading = false;
+                        Log.e("FlexibleAdapter", "UI update error: " + e.getMessage());
+                    }
+                });
+
+            } catch (Exception e){
+                activity.runOnUiThread(()->{
+                    isLoading=false;
+                    if(loadMoreListener!=null) {
+                        loadMoreListener.onLoadError(e.getMessage());
+                    }
+                    Log.e("FlexibleAdapter", "loadNextPage error: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    public void refreshData() {
+        currentPage=0;
+        isLoading=false;
+        hasMore=true;
+
+        items.clear();
+        notifyDataSetChanged();
+
+        loadNextPage();
     }
 
     @Override
@@ -132,7 +219,8 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         items.add(0,item);
         notifyItemInserted(0);
     }
-    public void addNerSameleItem() {
+    // 修正方法名拼写
+    public void addNewSampleItem() {
         FeedItem newItem = new FeedItem(
                 "新项目 " + System.currentTimeMillis(),
                 "这是通过菜单添加的新项目内容",
@@ -194,15 +282,14 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
     }
 
     public List<FeedItem> getAllFeedItems() {
-        items= dbHelper.getAllFeedItems();
         return items;
     }
-
-//    public List<FeedItem> getFeedItemsByPage(int page)
-//    {
-//        List<FeedItem> newItems=new ArrayList<FeedItem>();
-//        newItems=dbHelper.getFeedItemsByPage(page,PAGE_SIZE);
-//    }
+    public FeedItem getItemAt(int position) {
+        if (position >= 0 && position < items.size()) {
+            return items.get(position);
+        }
+        return null;
+    }
 
     static class BaseViewHolder extends RecyclerView.ViewHolder
     {

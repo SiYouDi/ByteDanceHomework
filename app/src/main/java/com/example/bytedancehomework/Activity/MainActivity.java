@@ -21,26 +21,27 @@ import com.example.bytedancehomework.databinding.ActivityMainBinding;
 import com.example.bytedancehomework.tracker.ExposureTracker;
 
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-implements FlexibleAdapter.OnItemClickListener
+implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListener
 {
-
-    private AppBarConfiguration appBarConfiguration;
-    private ActivityMainBinding binding;
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private ProgressBar progressBarLoadMore;
+    private ExposureTracker exposureTracker;
 
     private FlexibleAdapter adapter;
     private DatabaseHelper dbhelper;
@@ -50,28 +51,29 @@ implements FlexibleAdapter.OnItemClickListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        progressBarLoadMore=findViewById(R.id.progressBarLoadMore);
 
         dbhelper=new DatabaseHelper(this);
 
-        InitData();
         initAdapter();
         initRecycleView();
+        InitData();
     }
 
     private void initAdapter() {
-        adapter=new FlexibleAdapter(items, LayoutMode.single,dbhelper);
+        adapter=new FlexibleAdapter(this,new ArrayList<>(), LayoutMode.single,dbhelper);
         adapter.setOnItemClickListener(this);
+        adapter.setOnLoadMoreListener(this);
     }
 
     private void InitData()
     {
-        items=dbhelper.getAllFeedItems();
-
-        if(items.size()==0)
-        {
-            addSampleData();
-            items=dbhelper.getAllFeedItems();
+        List<FeedItem> dbItems = dbhelper.getAllFeedItems();
+        if (dbItems.size() == 0) {
+            addSampleData(); // 添加示例数据到数据库
         }
+        // 让 adapter 加载第一页数据
+        adapter.refreshData();
     }
 
     private void addSampleData()
@@ -97,7 +99,7 @@ implements FlexibleAdapter.OnItemClickListener
                 null, 700, 900,LayoutMode.single));
 
         for (FeedItem item : sampleItems) {
-            adapter.addItem(item);
+            dbhelper.insertFeedItem(item);
         }
     }
 
@@ -105,7 +107,7 @@ implements FlexibleAdapter.OnItemClickListener
        添加一个新的示例项目
      */
     private void addNewSampleItem() {
-        adapter.addNerSameleItem();
+        adapter.addNewSampleItem();
         Toast.makeText(this, "已添加新项目", Toast.LENGTH_SHORT).show();
     }
 
@@ -124,12 +126,17 @@ implements FlexibleAdapter.OnItemClickListener
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         recyclerView.setAdapter(adapter);
 
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
         //初始化监听器
         initMenuButton();
         initSwipeRefreshLayout();
-        initExposureTracker(recyclerView,items);
+        initExposureTracker();
+    }
 
-        switchToSingleMode();
+    private void initExposureTracker() {
+        exposureTracker = new ExposureTracker();
+        exposureTracker.startTrack(recyclerView, adapter);
     }
 
     private void initSwipeRefreshLayout() {
@@ -147,23 +154,10 @@ implements FlexibleAdapter.OnItemClickListener
         menuButton.setOnClickListener(this::showPopupMenu);
     }
 
-    private void initExposureTracker(RecyclerView recyclerView, List<FeedItem> items) {
-        ExposureTracker exposureTracker = new ExposureTracker();
-        exposureTracker.startTrack(recyclerView,items);
-    }
-
     private void refreshData() {
         swipeRefreshLayout.setRefreshing(true);
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                List<FeedItem> newitems=adapter.getAllFeedItems();
-                adapter.updateData(newitems);
-                items=newitems;
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        },2000);
+        adapter.refreshData();
     }
 
     //瀑布屏暂时不做
@@ -177,6 +171,8 @@ implements FlexibleAdapter.OnItemClickListener
         recyclerView.setLayoutManager(layoutManager);
         adapter.switchLayoutMode(LayoutMode.grid);
     }
+
+
 
     public void showPopupMenu(View view) {
         PopupMenu menu=new PopupMenu(this,view);
@@ -239,10 +235,34 @@ implements FlexibleAdapter.OnItemClickListener
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        if (exposureTracker != null) {
+            exposureTracker.stopTrack();
+        }
+
         if(dbhelper!=null)
         {
             dbhelper.close();
         }
+
+        super.onDestroy();
+    }
+
+    @Override
+    public void onLoadMoreStarted() {
+        progressBarLoadMore.setVisibility(View.VISIBLE);
+        Log.d("MainActivity", "onLoadMoreStarted: ");
+    }
+
+    @Override
+    public void onLoadComplete(List<FeedItem> newItems) {
+        swipeRefreshLayout.setRefreshing(false);
+        progressBarLoadMore.setVisibility(View.GONE);
+
+        Log.d("MainActivity", "加载完成，新增 " + newItems.size() + " 条数据");
+    }
+
+    @Override
+    public void onLoadError(String error) {
+
     }
 }
