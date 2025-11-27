@@ -45,7 +45,6 @@ implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListene
 
     private FlexibleAdapter adapter;
     private DatabaseHelper dbhelper;
-    private List<FeedItem> items;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -232,7 +231,8 @@ implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListene
 
     @Override
     public void onItemClick(FeedItem item) {
-        int position=items.indexOf(item);
+
+        int position=adapter.getPosition(item);
         if(position!=-1)
         {
             item.setFavorite(!item.isFavorite());
@@ -245,7 +245,7 @@ implements FlexibleAdapter.OnItemClickListener,FlexibleAdapter.OnLoadMoreListene
 
     @Override
     public void onItemLongClick(FeedItem item) {
-        int position = items.indexOf(item);
+        int position = adapter.getPosition(item);
         if (position != -1) {
             adapter.delItem(position);
             Toast.makeText(this, "已删除项目", Toast.LENGTH_SHORT).show();

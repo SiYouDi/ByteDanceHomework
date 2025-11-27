@@ -43,6 +43,11 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
 
     private long DELAY_TIME =2000;
 
+    public int getPosition(FeedItem item) {
+        int position = items.indexOf(item);
+        return position;
+    }
+
     //事件监听器
     public interface OnItemClickListener
     {
