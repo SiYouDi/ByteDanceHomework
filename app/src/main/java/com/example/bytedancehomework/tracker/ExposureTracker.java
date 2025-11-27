@@ -51,9 +51,22 @@ public class ExposureTracker {
         recyclerView.post(()->checkAllVisibleItems(recyclerView,items));
     }
     private void checkAllVisibleItems(RecyclerView recyclerView, List<FeedItem> items) {
+        if(items==null|| items.isEmpty())
+            return;
+
         LinearLayoutManager linearLayoutManager =(LinearLayoutManager) recyclerView.getLayoutManager();
+        if(linearLayoutManager==null)   return;
+
         int firstVisibleItemPosition=linearLayoutManager.findFirstVisibleItemPosition();
         int lastVisibleItemPosition=linearLayoutManager.findLastVisibleItemPosition();
+
+        if (firstVisibleItemPosition == RecyclerView.NO_POSITION ||
+                lastVisibleItemPosition == RecyclerView.NO_POSITION) {
+            return;
+        }
+
+        firstVisibleItemPosition = Math.max(0, firstVisibleItemPosition);
+        lastVisibleItemPosition = Math.min(items.size() - 1, lastVisibleItemPosition);
 
         for(int i=firstVisibleItemPosition;i<=lastVisibleItemPosition;i++)
         {
@@ -61,13 +74,19 @@ public class ExposureTracker {
 
             if(itemView!=null)
             {
-                RecyclerView.ViewHolder viewHolder = recyclerView.getChildViewHolder(itemView);
-                int position = viewHolder.getAdapterPosition();
 
-                FeedItem item = items.get(position);
+                if (i != RecyclerView.NO_POSITION &&
+                        i >= 0 &&
+                        i < items.size()) {
 
-                float ratio =calExposureRatio(recyclerView,itemView);
-                handleExposure(item,ratio);
+                    FeedItem item = items.get(i);  // 使用有效的 adapterPosition
+                    float ratio = calExposureRatio(recyclerView, itemView);
+                    handleExposure(item, ratio);
+                }
+                else
+                {
+                    Log.e("outOfRange", "checkAllVisibleItems");
+                }
             }
         }
     }

@@ -82,13 +82,13 @@ implements FlexibleAdapter.OnItemClickListener
                 "url1", 800, 600,LayoutMode.single));
         sampleItems.add(new FeedItem("Material Design",
                 "Material Design是Google推出的设计语言，提供一致的用户体验",
-                "url2", 600, 800,LayoutMode.single));
+                "url2", 600, 800,LayoutMode.grid));
         sampleItems.add(new FeedItem("Kotlin vs Java",
                 "比较Kotlin和Java在Android开发中的优缺点",
-                "url3", 400, 300,LayoutMode.single));
+                "url3", 400, 300,LayoutMode.grid));
         sampleItems.add(new FeedItem("数据库优化",
                 "学习如何优化SQLite数据库查询性能",
-                null, 800, 400,LayoutMode.single));
+                null, 800, 400,LayoutMode.grid));
         sampleItems.add(new FeedItem("UI/UX设计",
                 "创建美观且易用的用户界面设计原则",
                 null, 300, 500,LayoutMode.single));
@@ -97,7 +97,7 @@ implements FlexibleAdapter.OnItemClickListener
                 null, 700, 900,LayoutMode.single));
 
         for (FeedItem item : sampleItems) {
-            dbhelper.insertFeedItem(item);
+            adapter.addItem(item);
         }
     }
 
@@ -158,7 +158,7 @@ implements FlexibleAdapter.OnItemClickListener
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                List<FeedItem> newitems=dbhelper.getAllFeedItems();
+                List<FeedItem> newitems=adapter.getAllFeedItems();
                 adapter.updateData(newitems);
                 items=newitems;
                 swipeRefreshLayout.setRefreshing(false);
@@ -170,26 +170,12 @@ implements FlexibleAdapter.OnItemClickListener
     private void switchToSingleMode() {
         LinearLayoutManager layoutManager=new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        if(recyclerView.getAdapter()==null)
-        {
-            recyclerView.setAdapter(adapter);
-        }
-        else
-        {
-            adapter.switchLayoutMode(LayoutMode.single);
-        }
+        adapter.switchLayoutMode(LayoutMode.single);
     }
     private void switchToGridMode(){
         GridLayoutManager layoutManager = new GridLayoutManager(this,2);
         recyclerView.setLayoutManager(layoutManager);
-        if(recyclerView.getAdapter()==null)
-        {
-            recyclerView.setAdapter(adapter);
-        }
-        else
-        {
-            adapter.switchLayoutMode(LayoutMode.grid);
-        }
+        adapter.switchLayoutMode(LayoutMode.grid);
     }
 
     public void showPopupMenu(View view) {

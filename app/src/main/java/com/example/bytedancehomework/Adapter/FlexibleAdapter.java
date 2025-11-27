@@ -55,17 +55,9 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
 
     @Override
     public int getItemViewType(int position) {
-        switch (layoutMode)
-        {
-            case single:
-                return VIEW_TYPE_SINGLE;
-            case grid:
-                return VIEW_TYPE_GRID;
-            case staggered:
-                return VIEW_TYPE_STAGGERED;
-            default:
-                return VIEW_TYPE_SINGLE;
-        }
+        FeedItem item = items.get(position);
+        LayoutMode layoutMode1 = item.getLayoutMode();
+        return layoutMode1.ordinal();
     }
 
     @NonNull
@@ -199,6 +191,11 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         } else {
             Log.e("FlexibleAdapter", "updateItem: 数据库更新失败");
         }
+    }
+
+    public List<FeedItem> getAllFeedItems() {
+        items= dbHelper.getAllFeedItems();
+        return items;
     }
 
 //    public List<FeedItem> getFeedItemsByPage(int page)
