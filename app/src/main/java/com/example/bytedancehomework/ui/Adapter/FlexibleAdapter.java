@@ -22,7 +22,7 @@ import com.example.bytedancehomework.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseViewHolder> {
+public class FlexibleAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     // 常量
     private static final int VIEW_TYPE_SINGLE = 0;
     private static final int VIEW_TYPE_GRID = 1;
@@ -330,35 +330,5 @@ public class FlexibleAdapter extends RecyclerView.Adapter<FlexibleAdapter.BaseVi
         });
     }
 
-    // ==================== ViewHolder类 ====================
 
-    static class BaseViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageView;
-        TextView textTitle;
-        TextView textContent;
-
-        public BaseViewHolder(@NonNull View itemView) {
-            super(itemView);
-            imageView = itemView.findViewById(R.id.imageView);
-            textTitle = itemView.findViewById(R.id.textTitle);
-            textContent = itemView.findViewById(R.id.textContent);
-        }
-
-        public void bind(FeedItem item) {
-            textTitle.setText(item.getTitle());
-            textContent.setText(item.getContent());
-
-            if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
-                Glide.with(itemView.getContext())
-                        .load(item.getImageUrl())
-                        .apply(new RequestOptions()
-                                .placeholder(R.drawable.placeholder_image)
-                                .error(R.drawable.error_image)
-                                .centerCrop())
-                        .into(imageView);
-            } else {
-                imageView.setImageResource(R.drawable.placeholder_image);
-            }
-        }
-    }
 }
