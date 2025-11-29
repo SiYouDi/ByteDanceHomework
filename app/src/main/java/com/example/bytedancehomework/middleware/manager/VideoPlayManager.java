@@ -73,21 +73,28 @@ public class VideoPlayManager {
         currentPlayingItem=item;
         currentVideoView=videoView;
 
-        try
-        {
+        try {
             currentVideoView.setVideoPath(item.getVideoUrl());
 
-            if(item.getLastPlayPosition()>0)
-                currentVideoView.seekTo((int)item.getLastPlayPosition());
+            if (item.getLastPlayPosition() > 0) {
+                currentVideoView.seekTo((int) item.getLastPlayPosition());
+            }
 
+            // 统一在 VideoPlayManager 中设置完成监听器
             currentVideoView.setOnCompletionListener(mp -> {
                 stopPlayback();
-                if(playbackStateListener!=null&&currentPlayingItem!=null)
+                // 通知监听器播放完成，由监听器处理UI更新
+                if (playbackStateListener != null) {
                     playbackStateListener.onPlaybackCompleted(currentPlayingItem);
+                }
             });
-        }catch (Exception e)
-        {
-            Log.e("Video", "setupVideoPlayback: "+e.toString() );
+
+        } catch (Exception e) {
+            if (playbackStateListener != null) {
+                playbackStateListener.onPlaybackError(item, e.getMessage());
+            }
+            currentPlayingItem = null;
+            currentVideoView = null;
         }
     }
 

@@ -25,6 +25,7 @@ import com.example.bytedancehomework.Enum.LayoutMode;
 import com.example.bytedancehomework.Item.FeedItem;
 import com.example.bytedancehomework.R;
 import com.example.bytedancehomework.middleware.manager.ExposureTracker;
+import com.example.bytedancehomework.middleware.manager.VideoPlayManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements FlexibleAdapter.OnItemClickListener,
         FlexibleAdapter.OnLoadMoreListener,
-        FlexibleAdapter.OnShowLoadMoreButtonListener {
+        FlexibleAdapter.OnShowLoadMoreButtonListener,
+        VideoPlayManager.PlaybackStateListener {
 
     // UI组件
     private RecyclerView recyclerView;
@@ -44,6 +46,7 @@ public class MainActivity extends AppCompatActivity
     private FlexibleAdapter adapter;
     private DatabaseHelper dbHelper;
     private ExposureTracker exposureTracker;
+    private VideoPlayManager videoPlayManager;
 
     // ==================== 生命周期方法 ====================
 
@@ -69,6 +72,7 @@ public class MainActivity extends AppCompatActivity
         progressBarLoadMore = findViewById(R.id.progressBarLoadMore);
         dbHelper = new DatabaseHelper(this);
         adapter = new FlexibleAdapter(this, new ArrayList<>(), LayoutMode.single, dbHelper);
+        videoPlayManager = VideoPlayManager.getInstance();
     }
 
     private void setupUI() {
@@ -297,6 +301,32 @@ public class MainActivity extends AppCompatActivity
                 lordMoreButton.setVisibility(View.GONE);
             }
         });
+    }
+
+    // ==================== 视频监听器实现 ====================
+    @Override
+    public void onPlaybackStarted(FeedItem item) {
+
+    }
+
+    @Override
+    public void onPlaybackPaused(FeedItem item, int currentPosition) {
+
+    }
+
+    @Override
+    public void onPlaybackStopped(FeedItem item) {
+
+    }
+
+    @Override
+    public void onPlaybackCompleted(FeedItem item) {
+
+    }
+
+    @Override
+    public void onPlaybackError(FeedItem item, String error) {
+
     }
 
     // ==================== 资源清理方法 ====================
