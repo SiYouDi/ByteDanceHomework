@@ -19,12 +19,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.bytedancehomework.Adapter.FlexibleAdapter;
+import com.example.bytedancehomework.middleware.adapter.FlexibleAdapter;
 import com.example.bytedancehomework.DBHelper.DatabaseHelper;
 import com.example.bytedancehomework.Enum.LayoutMode;
 import com.example.bytedancehomework.Item.FeedItem;
 import com.example.bytedancehomework.R;
-import com.example.bytedancehomework.tracker.ExposureTracker;
+import com.example.bytedancehomework.middleware.manager.ExposureTracker;
 
 import java.util.ArrayList;
 import java.util.List;

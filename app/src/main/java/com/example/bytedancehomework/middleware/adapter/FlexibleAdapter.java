@@ -1,5 +1,5 @@
 // FlexibleAdapter.java
-package com.example.bytedancehomework.Adapter;
+package com.example.bytedancehomework.middleware.adapter;
 
 import android.app.Activity;
 import android.util.Log;
