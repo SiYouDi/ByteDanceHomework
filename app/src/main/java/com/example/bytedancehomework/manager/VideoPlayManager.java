@@ -1,10 +1,9 @@
-package com.example.bytedancehomework.middleware.manager;
+package com.example.bytedancehomework.manager;
 
-import android.util.Log;
 import android.widget.VideoView;
 
-import com.example.bytedancehomework.DBHelper.DatabaseHelper;
-import com.example.bytedancehomework.Item.FeedItem;
+import com.example.bytedancehomework.data.DBHelper.DatabaseHelper;
+import com.example.bytedancehomework.data.Item.FeedItem;
 
 public class VideoPlayManager {
 

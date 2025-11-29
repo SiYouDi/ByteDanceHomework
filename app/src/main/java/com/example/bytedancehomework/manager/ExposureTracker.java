@@ -1,5 +1,5 @@
 // ExposureTracker.java
-package com.example.bytedancehomework.middleware.manager;
+package com.example.bytedancehomework.manager;
 
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
@@ -10,8 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.bytedancehomework.middleware.adapter.FlexibleAdapter;
-import com.example.bytedancehomework.Item.FeedItem;
+import com.example.bytedancehomework.ui.Adapter.FlexibleAdapter;
+import com.example.bytedancehomework.data.Item.FeedItem;
 
 import java.util.HashMap;
 import java.util.List;

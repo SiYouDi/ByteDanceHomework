@@ -1,5 +1,5 @@
 // DatabaseHelper.java
-package com.example.bytedancehomework.DBHelper;
+package com.example.bytedancehomework.data.DBHelper;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.example.bytedancehomework.Enum.MediaType;
-import com.example.bytedancehomework.Item.FeedItem;
+import com.example.bytedancehomework.data.Item.FeedItem;
 
 import java.util.ArrayList;
 import java.util.List;

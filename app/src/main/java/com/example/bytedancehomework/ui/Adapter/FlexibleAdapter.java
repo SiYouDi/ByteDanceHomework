@@ -1,5 +1,5 @@
 // FlexibleAdapter.java
-package com.example.bytedancehomework.middleware.adapter;
+package com.example.bytedancehomework.ui.Adapter;
 
 import android.app.Activity;
 import android.util.Log;
@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.example.bytedancehomework.DBHelper.DatabaseHelper;
+import com.example.bytedancehomework.data.DBHelper.DatabaseHelper;
 import com.example.bytedancehomework.Enum.LayoutMode;
-import com.example.bytedancehomework.Item.FeedItem;
+import com.example.bytedancehomework.data.Item.FeedItem;
 import com.example.bytedancehomework.R;
 
 import java.util.ArrayList;

@@ -1,5 +1,5 @@
 // MainActivity.java
-package com.example.bytedancehomework.Activity;
+package com.example.bytedancehomework.ui.Activity;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -19,13 +19,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.example.bytedancehomework.middleware.adapter.FlexibleAdapter;
-import com.example.bytedancehomework.DBHelper.DatabaseHelper;
+import com.example.bytedancehomework.ui.Adapter.FlexibleAdapter;
+import com.example.bytedancehomework.data.DBHelper.DatabaseHelper;
 import com.example.bytedancehomework.Enum.LayoutMode;
-import com.example.bytedancehomework.Item.FeedItem;
+import com.example.bytedancehomework.data.Item.FeedItem;
 import com.example.bytedancehomework.R;
-import com.example.bytedancehomework.middleware.manager.ExposureTracker;
-import com.example.bytedancehomework.middleware.manager.VideoPlayManager;
+import com.example.bytedancehomework.manager.ExposureTracker;
+import com.example.bytedancehomework.manager.VideoPlayManager;
 
 import java.util.ArrayList;
 import java.util.List;
