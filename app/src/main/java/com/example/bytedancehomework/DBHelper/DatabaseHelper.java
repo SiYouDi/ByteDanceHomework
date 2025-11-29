@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.example.bytedancehomework.Enum.MediaType;
 import com.example.bytedancehomework.Item.FeedItem;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
     // 数据库信息
     private static final String DATABASE_NAME = "feed_app.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2; // 版本升级，因为表结构变更
 
     // 表名和列名
     public static final String TABLE_FEED_ITEMS = "feed_items";
@@ -30,7 +31,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_IS_FAVORITE = "is_favorite";
     public static final String COLUMN_LAYOUT_MODE = "layout_mode";
 
-    // 创建表的SQL语句
+    // 新增的视频相关列
+    public static final String COLUMN_VIDEO_URL = "video_url";
+    public static final String COLUMN_VIDEO_COVER_URL = "video_cover_url";
+    public static final String COLUMN_VIDEO_DURATION = "video_duration";
+    public static final String COLUMN_LAST_PLAY_POSITION = "last_play_position";
+    public static final String COLUMN_VIDEO_WIDTH = "video_width";
+    public static final String COLUMN_VIDEO_HEIGHT = "video_height";
+    public static final String COLUMN_MEDIA_TYPE = "media_type";
+
+    // 创建表的SQL语句 - 更新版本
     private static final String CREATE_TABLE_FEED_ITEMS =
             "CREATE TABLE " + TABLE_FEED_ITEMS + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -40,11 +50,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_IMAGE_WIDTH + " INTEGER DEFAULT 0, " +
                     COLUMN_IMAGE_HEIGHT + " INTEGER DEFAULT 0, " +
                     COLUMN_CREATED_AT + " INTEGER NOT NULL, " +
-                    COLUMN_IS_FAVORITE + " INTEGER DEFAULT 0," +
-                    COLUMN_LAYOUT_MODE + " INTEGER NOT NULL" +
+                    COLUMN_IS_FAVORITE + " INTEGER DEFAULT 0, " +
+                    COLUMN_LAYOUT_MODE + " INTEGER NOT NULL, " +
+                    COLUMN_VIDEO_URL + " TEXT, " +
+                    COLUMN_VIDEO_COVER_URL + " TEXT, " +
+                    COLUMN_VIDEO_DURATION + " INTEGER DEFAULT 0, " +
+                    COLUMN_LAST_PLAY_POSITION + " INTEGER DEFAULT 0, " +
+                    COLUMN_VIDEO_WIDTH + " INTEGER DEFAULT 0, " +
+                    COLUMN_VIDEO_HEIGHT + " INTEGER DEFAULT 0, " +
+                    COLUMN_MEDIA_TYPE + " INTEGER DEFAULT 0" + // 0=IMAGE, 1=VIDEO
                     ");";
 
-    // 查询列数组
+    // 查询列数组 - 更新包含所有列
     private static final String[] ALL_COLUMNS = {
             COLUMN_ID,
             COLUMN_TITLE,
@@ -54,7 +71,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             COLUMN_IMAGE_HEIGHT,
             COLUMN_CREATED_AT,
             COLUMN_IS_FAVORITE,
-            COLUMN_LAYOUT_MODE
+            COLUMN_LAYOUT_MODE,
+            COLUMN_VIDEO_URL,
+            COLUMN_VIDEO_COVER_URL,
+            COLUMN_VIDEO_DURATION,
+            COLUMN_LAST_PLAY_POSITION,
+            COLUMN_VIDEO_WIDTH,
+            COLUMN_VIDEO_HEIGHT,
+            COLUMN_MEDIA_TYPE
     };
 
     // ==================== 构造方法 ====================
@@ -72,8 +96,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FEED_ITEMS);
-        onCreate(db);
+        if (oldVersion < 2) {
+            // 从版本1升级到版本2：添加视频相关字段
+            db.execSQL("ALTER TABLE " + TABLE_FEED_ITEMS + " ADD COLUMN " + COLUMN_VIDEO_URL + " TEXT");
+            db.execSQL("ALTER TABLE " + TABLE_FEED_ITEMS + " ADD COLUMN " + COLUMN_VIDEO_COVER_URL + " TEXT");
+            db.execSQL("ALTER TABLE " + TABLE_FEED_ITEMS + " ADD COLUMN " + COLUMN_VIDEO_DURATION + " INTEGER DEFAULT 0");
+            db.execSQL("ALTER TABLE " + TABLE_FEED_ITEMS + " ADD COLUMN " + COLUMN_LAST_PLAY_POSITION + " INTEGER DEFAULT 0");
+            db.execSQL("ALTER TABLE " + TABLE_FEED_ITEMS + " ADD COLUMN " + COLUMN_VIDEO_WIDTH + " INTEGER DEFAULT 0");
+            db.execSQL("ALTER TABLE " + TABLE_FEED_ITEMS + " ADD COLUMN " + COLUMN_VIDEO_HEIGHT + " INTEGER DEFAULT 0");
+            db.execSQL("ALTER TABLE " + TABLE_FEED_ITEMS + " ADD COLUMN " + COLUMN_MEDIA_TYPE + " INTEGER DEFAULT 0");
+        } else {
+            // 其他版本升级逻辑
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_FEED_ITEMS);
+            onCreate(db);
+        }
     }
 
     // ==================== 数据插入方法 ====================
@@ -121,6 +157,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         int count = db.update(TABLE_FEED_ITEMS, values, selection, selectionArgs);
         Log.d("dbHelper", "updateFeedItem: " + count);
+        db.close();
+
+        return count;
+    }
+
+    // 更新播放位置（单独方法，因为这是频繁操作）
+    public int updateVideoPlayPosition(long itemId, long playPosition) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_LAST_PLAY_POSITION, playPosition);
+
+        String selection = COLUMN_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(itemId)};
+
+        int count = db.update(TABLE_FEED_ITEMS, values, selection, selectionArgs);
         db.close();
 
         return count;
@@ -227,6 +278,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return items;
     }
 
+    // 新增：根据媒体类型查询
+    public List<FeedItem> getFeedItemsByMediaType(MediaType mediaType) {
+        List<FeedItem> items = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String selection = COLUMN_MEDIA_TYPE + " = ?";
+        String[] selectionArgs = {String.valueOf(mediaType.ordinal())};
+
+        Cursor cursor = db.query(
+                TABLE_FEED_ITEMS,
+                ALL_COLUMNS,
+                selection, selectionArgs, null, null,
+                COLUMN_CREATED_AT + " DESC"
+        );
+
+        extractFeedItemsFromCursor(cursor, items);
+        db.close();
+
+        return items;
+    }
+
     // ==================== 工具方法 ====================
 
     private ContentValues createContentValues(FeedItem item) {
@@ -239,6 +311,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_CREATED_AT, item.getCreatedAt());
         values.put(COLUMN_IS_FAVORITE, item.getIsFavorite());
         values.put(COLUMN_LAYOUT_MODE, item.getLayoutMode().ordinal());
+
+        // 新增视频相关字段
+        values.put(COLUMN_VIDEO_URL, item.getVideoUrl());
+        values.put(COLUMN_VIDEO_COVER_URL, item.getVideoCoverUrl());
+        values.put(COLUMN_VIDEO_DURATION, item.getVideoDuration());
+        values.put(COLUMN_LAST_PLAY_POSITION, item.getLastPlayPosition());
+        values.put(COLUMN_VIDEO_WIDTH, item.getVideoWidth());
+        values.put(COLUMN_VIDEO_HEIGHT, item.getVideoHeight());
+        values.put(COLUMN_MEDIA_TYPE, item.getMediaType().ordinal());
+
         return values;
     }
 
@@ -285,5 +367,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         int layoutModeValue = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LAYOUT_MODE));
         item.setLayoutModeFromValue(layoutModeValue);
+
+        // 新增视频相关字段
+        item.setVideoUrl(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_VIDEO_URL)));
+        item.setVideoCoverUrl(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_VIDEO_COVER_URL)));
+        item.setVideoDuration(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_VIDEO_DURATION)));
+        item.setLastPlayPosition(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_LAST_PLAY_POSITION)));
+        item.setVideoWidth(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_VIDEO_WIDTH)));
+        item.setVideoHeight(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_VIDEO_HEIGHT)));
+
+        int mediaTypeValue = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MEDIA_TYPE));
+        item.setMediaTypeFromValue(mediaTypeValue);
     }
 }
