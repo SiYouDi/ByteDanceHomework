@@ -167,24 +167,31 @@ public class MainActivity extends AppCompatActivity
 
     private void addSampleData() {
         List<FeedItem> sampleItems = new ArrayList<>();
-        sampleItems.add(new FeedItem("Android开发教程",
-                "学习如何使用RecyclerView和SQLite创建强大的Android应用",
-                "url1", 800, 600, LayoutMode.single));
-        sampleItems.add(new FeedItem("Material Design",
-                "Material Design是Google推出的设计语言，提供一致的用户体验",
-                "url2", 600, 800, LayoutMode.grid));
-        sampleItems.add(new FeedItem("Kotlin vs Java",
-                "比较Kotlin和Java在Android开发中的优缺点",
-                "url3", 400, 300, LayoutMode.grid));
-        sampleItems.add(new FeedItem("数据库优化",
-                "学习如何优化SQLite数据库查询性能",
-                null, 800, 400, LayoutMode.grid));
-        sampleItems.add(new FeedItem("UI/UX设计",
-                "创建美观且易用的用户界面设计原则",
-                null, 300, 500, LayoutMode.single));
-        sampleItems.add(new FeedItem("性能调优",
-                "提升Android应用性能的技巧和最佳实践",
-                null, 700, 900, LayoutMode.single));
+        // 单列图片
+        sampleItems.add(new FeedItem("单列图片标题",
+                "这是单列布局的图片内容描述",
+                "https://example.com/image1.jpg",
+                800, 600, LayoutMode.single));
+
+        // 单列视频
+        sampleItems.add(new FeedItem("单列视频标题",
+                "这是单列布局的视频内容描述",
+                "https://example.com/video1.mp4",
+                "https://example.com/video_cover1.jpg",
+                1920, 1080, 120000, LayoutMode.single));
+
+        // 网格图片
+        sampleItems.add(new FeedItem("网格图片标题",
+                "这是网格布局的图片内容",
+                "https://example.com/image2.jpg",
+                400, 300, LayoutMode.grid));
+
+        // 网格视频
+        sampleItems.add(new FeedItem("网格视频标题",
+                "这是网格布局的视频内容",
+                "https://example.com/video2.mp4",
+                "https://example.com/video_cover2.jpg",
+                1280, 720, 90000, LayoutMode.grid));
 
         for (FeedItem item : sampleItems) {
             dbHelper.insertFeedItem(item);
