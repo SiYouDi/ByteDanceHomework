@@ -14,26 +14,33 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.bytedancehomework.Enum.MediaType;
 import com.example.bytedancehomework.data.DBHelper.DatabaseHelper;
 import com.example.bytedancehomework.Enum.LayoutMode;
 import com.example.bytedancehomework.data.Item.FeedItem;
 import com.example.bytedancehomework.R;
+import com.example.bytedancehomework.manager.VideoPlayManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FlexibleAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     // 常量
-    private static final int VIEW_TYPE_SINGLE = 0;
-    private static final int VIEW_TYPE_GRID = 1;
-    private static final int VIEW_TYPE_STAGGERED = 2;
-    private static final int PAGE_SIZE = 5;
+    private static final int VIEW_TYPE_SINGLE_IMAGE = 0;
+    private static final int VIEW_TYPE_SINGLE_VIDEO = 1;
+    private static final int VIEW_TYPE_GRID_IMAGE = 2;
+    private static final int VIEW_TYPE_GRID_VIDEO = 3;
+    private static final int VIEW_TYPE_STAGGERED_IMAGE = 4;
+    private static final int VIEW_TYPE_STAGGERED_VIDEO = 5;
+
+    private final int PAGE_SIZE=5;
 
     // 成员变量
     private List<FeedItem> items;
     private DatabaseHelper dbHelper;
     private LayoutMode layoutMode;
     private Activity activity;
+    private VideoPlayManager videoPlayManager;
 
     private int currentPage = 0;
     private boolean isLoading = false;
@@ -64,11 +71,12 @@ public class FlexibleAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
     // ==================== 构造方法 ====================
 
-    public FlexibleAdapter(Activity activity, List<FeedItem> items, LayoutMode layoutMode, DatabaseHelper dbHelper) {
+    public FlexibleAdapter(Activity activity, List<FeedItem> items, LayoutMode layoutMode, DatabaseHelper dbHelper,VideoPlayManager videoPlayManager) {
         this.activity = activity;
         this.items = items;
         this.layoutMode = layoutMode;
         this.dbHelper = dbHelper;
+        this.videoPlayManager=videoPlayManager;
     }
 
     // ==================== 监听器设置方法 ====================
@@ -90,31 +98,60 @@ public class FlexibleAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     @Override
     public int getItemViewType(int position) {
         FeedItem item = items.get(position);
-        LayoutMode layoutMode1 = item.getLayoutMode();
-        return layoutMode1.ordinal();
+
+        // 组合 layoutMode 和 mediaType 生成唯一的视图类型
+        if (item.getMediaType() == MediaType.image) {
+            switch (item.getLayoutMode()) {
+                case single:
+                    return VIEW_TYPE_SINGLE_IMAGE;
+                case grid:
+                    return VIEW_TYPE_GRID_IMAGE;
+                case staggered:
+                    return VIEW_TYPE_STAGGERED_IMAGE;
+            }
+        } else { // VIDEO
+            switch (item.getLayoutMode()) {
+                case single:
+                    return VIEW_TYPE_SINGLE_VIDEO;
+                case grid:
+                    return VIEW_TYPE_GRID_VIDEO;
+                case staggered:
+                    return VIEW_TYPE_STAGGERED_VIDEO;
+            }
+        }
+        return VIEW_TYPE_SINGLE_IMAGE; // 默认
     }
 
     @NonNull
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View itemView = null;
 
         switch (viewType) {
-            case VIEW_TYPE_SINGLE:
-                itemView = inflater.inflate(R.layout.layout_feed_item_single, parent, false);
-                break;
-            case VIEW_TYPE_GRID:
-                itemView = inflater.inflate(R.layout.layout_feed_item_grid, parent, false);
-                break;
-            case VIEW_TYPE_STAGGERED:
-                itemView = inflater.inflate(R.layout.layout_feed_item_staggered, parent, false);
-                break;
-            default:
-                itemView = inflater.inflate(R.layout.layout_feed_item_single, parent, false);
-        }
+            case VIEW_TYPE_SINGLE_IMAGE:
+                View singleImageView = inflater.inflate(R.layout.layout_feed_item_single, parent, false);
+                return new ImageViewHolder(singleImageView);
 
-        return new BaseViewHolder(itemView);
+            case VIEW_TYPE_SINGLE_VIDEO:
+                View singleVideoView = inflater.inflate(R.layout.layout_video_feed_item_single, parent, false);
+                return new VideoViewHolder(singleVideoView, videoPlayManager);
+
+            case VIEW_TYPE_GRID_IMAGE:
+                View gridImageView = inflater.inflate(R.layout.layout_feed_item_grid, parent, false);
+                return new ImageViewHolder(gridImageView);
+
+            case VIEW_TYPE_GRID_VIDEO:
+                View gridVideoView = inflater.inflate(R.layout.layout_video_feed_item_grid, parent, false);
+                return new VideoViewHolder(gridVideoView, videoPlayManager);
+
+            case VIEW_TYPE_STAGGERED_IMAGE:
+                View staggeredImageView = inflater.inflate(R.layout.layout_feed_item_staggered, parent, false);
+                return new ImageViewHolder(staggeredImageView);
+
+            default:
+                View defaultView = inflater.inflate(R.layout.layout_feed_item_single, parent, false);
+                return new ImageViewHolder(defaultView);
+        }
     }
 
     @Override

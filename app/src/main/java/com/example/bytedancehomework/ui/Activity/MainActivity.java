@@ -71,8 +71,8 @@ public class MainActivity extends AppCompatActivity
     private void initializeComponents() {
         progressBarLoadMore = findViewById(R.id.progressBarLoadMore);
         dbHelper = new DatabaseHelper(this);
-        adapter = new FlexibleAdapter(this, new ArrayList<>(), LayoutMode.single, dbHelper);
         videoPlayManager = VideoPlayManager.getInstance();
+        adapter = new FlexibleAdapter(this, new ArrayList<>(), LayoutMode.single, dbHelper,videoPlayManager);
     }
 
     private void setupUI() {
