@@ -305,21 +305,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COLUMN_TITLE, item.getTitle());
         values.put(COLUMN_CONTENT, item.getContent());
-        values.put(COLUMN_IMAGE_URL, item.getImageUrl());
-        values.put(COLUMN_IMAGE_WIDTH, item.getImageWidth());
-        values.put(COLUMN_IMAGE_HEIGHT, item.getImageHeight());
         values.put(COLUMN_CREATED_AT, item.getCreatedAt());
         values.put(COLUMN_IS_FAVORITE, item.getIsFavorite());
         values.put(COLUMN_LAYOUT_MODE, item.getLayoutMode().ordinal());
-
-        // 新增视频相关字段
-        values.put(COLUMN_VIDEO_URL, item.getVideoUrl());
-        values.put(COLUMN_VIDEO_COVER_URL, item.getVideoCoverUrl());
-        values.put(COLUMN_VIDEO_DURATION, item.getVideoDuration());
-        values.put(COLUMN_LAST_PLAY_POSITION, item.getLastPlayPosition());
-        values.put(COLUMN_VIDEO_WIDTH, item.getVideoWidth());
-        values.put(COLUMN_VIDEO_HEIGHT, item.getVideoHeight());
         values.put(COLUMN_MEDIA_TYPE, item.getMediaType().ordinal());
+
+        // 根据媒体类型设置相应的字段
+        if (item.getMediaType() == MediaType.image) {
+            values.put(COLUMN_IMAGE_URL, item.getImageUrl());
+            values.put(COLUMN_IMAGE_WIDTH, item.getImageWidth());
+            values.put(COLUMN_IMAGE_HEIGHT, item.getImageHeight());
+            // 视频字段设为 null 或默认值
+            values.put(COLUMN_VIDEO_URL, (String) null);
+            values.put(COLUMN_VIDEO_COVER_URL, (String) null);
+            values.put(COLUMN_VIDEO_DURATION, 0);
+            values.put(COLUMN_LAST_PLAY_POSITION, 0);
+            values.put(COLUMN_VIDEO_WIDTH, 0);
+            values.put(COLUMN_VIDEO_HEIGHT, 0);
+        } else { // VIDEO
+            values.put(COLUMN_VIDEO_URL, item.getVideoUrl());
+            values.put(COLUMN_VIDEO_COVER_URL, item.getVideoCoverUrl());
+            values.put(COLUMN_VIDEO_DURATION, item.getVideoDuration());
+            values.put(COLUMN_LAST_PLAY_POSITION, item.getLastPlayPosition());
+            values.put(COLUMN_VIDEO_WIDTH, item.getVideoWidth());
+            values.put(COLUMN_VIDEO_HEIGHT, item.getVideoHeight());
+            // 图片字段设为 null 或默认值
+            values.put(COLUMN_IMAGE_URL, (String) null);
+            values.put(COLUMN_IMAGE_WIDTH, 0);
+            values.put(COLUMN_IMAGE_HEIGHT, 0);
+        }
 
         return values;
     }

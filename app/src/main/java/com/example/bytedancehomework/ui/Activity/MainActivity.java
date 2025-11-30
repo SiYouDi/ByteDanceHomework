@@ -217,6 +217,7 @@ public class MainActivity extends AppCompatActivity
     private void addNewSampleItem() {
         adapter.addNewSampleItem();
         Toast.makeText(this, "已添加新项目", Toast.LENGTH_SHORT).show();
+        adapter.refreshData();
     }
 
     private void clearAllData() {
@@ -363,7 +364,11 @@ public class MainActivity extends AppCompatActivity
         runOnUiThread(() -> {
             if (item != null) {
                 Toast.makeText(this, "播放完成: " + item.getTitle(), Toast.LENGTH_SHORT).show();
-                autoPlayNextVideo(item);
+                Log.d("MainActivity", "播放完成");
+
+                recyclerView.postDelayed(() -> {
+                    autoPlayNextVideo(item);
+                }, 300); // 300ms 延迟
             } else {
                 Toast.makeText(this, "播放完成", Toast.LENGTH_SHORT).show();
                 Log.w("MainActivity", "onPlaybackCompleted: item is null");

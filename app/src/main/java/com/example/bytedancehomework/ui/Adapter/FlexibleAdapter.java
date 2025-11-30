@@ -186,6 +186,7 @@ public class FlexibleAdapter extends RecyclerView.Adapter<BaseViewHolder> {
                 "android.resource://" + activity.getPackageName()+'/'+R.drawable.video_cover,
                 1920, 1080, 120000, LayoutMode.single));
 
+
         // 网格视频
         sampleItems.add(new FeedItem("网格视频标题",
                 "这是网格布局的视频内容",
@@ -195,6 +196,7 @@ public class FlexibleAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
         for (FeedItem item : sampleItems) {
             dbHelper.insertFeedItem(item);
+
         }
     }
 
