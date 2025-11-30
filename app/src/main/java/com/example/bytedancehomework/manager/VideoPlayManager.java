@@ -81,10 +81,11 @@ public class VideoPlayManager {
 
             // 统一在 VideoPlayManager 中设置完成监听器
             currentVideoView.setOnCompletionListener(mp -> {
+                FeedItem completedItem =currentPlayingItem;
                 stopPlayback();
                 // 通知监听器播放完成，由监听器处理UI更新
                 if (playbackStateListener != null) {
-                    playbackStateListener.onPlaybackCompleted(currentPlayingItem);
+                    playbackStateListener.onPlaybackCompleted(completedItem);
                 }
             });
 

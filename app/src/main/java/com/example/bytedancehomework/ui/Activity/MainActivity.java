@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity
         // 单列视频
         sampleItems.add(new FeedItem("单列视频标题",
                 "这是单列布局的视频内容描述",
-                "https://example.com/video1.mp4",
+                "http://117.72.208.2/videos/test.mp4",
                 "https://example.com/video_cover1.jpg",
                 1920, 1080, 120000, LayoutMode.single));
 
@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity
         // 网格视频
         sampleItems.add(new FeedItem("网格视频标题",
                 "这是网格布局的视频内容",
-                "https://example.com/video2.mp4",
+                "http://117.72.208.2/videos/test.mp4",
                 "https://example.com/video_cover2.jpg",
                 1280, 720, 90000, LayoutMode.grid));
 
@@ -345,16 +345,22 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onPlaybackCompleted(FeedItem item) {
         runOnUiThread(() -> {
-            Toast.makeText(this, "播放完成: " + item.getTitle(), Toast.LENGTH_SHORT).show();
-            autoPlayNextVideo(item);
+            if (item != null) {
+                Toast.makeText(this, "播放完成: " + item.getTitle(), Toast.LENGTH_SHORT).show();
+                autoPlayNextVideo(item);
+            } else {
+                Toast.makeText(this, "播放完成", Toast.LENGTH_SHORT).show();
+                Log.w("MainActivity", "onPlaybackCompleted: item is null");
+            }
         });
     }
 
     @Override
     public void onPlaybackError(FeedItem item, String error) {
         runOnUiThread(() -> {
+            String itemTitle = item != null ? item.getTitle() : "未知视频";
             Toast.makeText(this, "播放失败: " + error, Toast.LENGTH_SHORT).show();
-            Log.e("MainActivity", "视频播放错误: " + error);
+            Log.e("MainActivity", "视频播放错误 - " + itemTitle + ": " + error);
         });
     }
 
