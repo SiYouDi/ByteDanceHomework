@@ -50,6 +50,8 @@ public class MainActivity extends AppCompatActivity
     private ExposureTracker exposureTracker;
     private VideoPlayManager videoPlayManager;
 
+    private int currentAutoPlayPosition=0;
+
     // ==================== 生命周期方法 ====================
 
     @Override
@@ -400,7 +402,7 @@ public class MainActivity extends AppCompatActivity
     {
         String TAG="MainActivity";
         Log.d("MainActivity", "autoPlayVideo: 进入");
-        for(int i=0;i<adapter.getItemCount();i++)
+        for(int i=currentAutoPlayPosition;i<adapter.getItemCount();i++)
         {
 //            Log.d(TAG, "autoPlayVideo: "+i);
             RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(i);
@@ -414,7 +416,8 @@ public class MainActivity extends AppCompatActivity
                     if(viewHolder instanceof VideoViewHolder)
                     {
                         ((VideoViewHolder) viewHolder).playVideo();
-//                        Log.d("MainActivity", "autoPlayVideo: 播放");
+                        currentAutoPlayPosition=i;
+                        Log.d("MainActivity", "autoPlayVideo: 播放 "+currentAutoPlayPosition);
                         break;
                     }
                 }
@@ -439,7 +442,8 @@ public class MainActivity extends AppCompatActivity
                     if(viewHolder instanceof VideoViewHolder)
                     {
                         ((VideoViewHolder) viewHolder).playVideo();
-                        Log.d("MainActivity", "播放autoPlayNextVideo");
+                        currentAutoPlayPosition=i;
+                        Log.d("MainActivity", "播放autoPlayNextVideo "+currentAutoPlayPosition);
                         break;
                     }
                 }
