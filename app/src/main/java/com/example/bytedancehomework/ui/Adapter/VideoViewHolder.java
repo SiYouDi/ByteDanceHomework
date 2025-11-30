@@ -89,6 +89,15 @@ public class VideoViewHolder extends BaseViewHolder {
         }
     }
 
+
+    public void playVideo() {
+        if(currentItem != null) {
+            videoPlayManager.setupVideoPlayback(currentItem, videoView);
+            videoPlayManager.startPlayback();
+            hidePlayState();
+        }
+    }
+
     private void showPlayState() {
         videoCoverView.setVisibility(View.VISIBLE);
         playIcon.setVisibility(View.VISIBLE);

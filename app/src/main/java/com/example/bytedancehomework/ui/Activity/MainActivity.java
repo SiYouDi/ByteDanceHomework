@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,6 +27,7 @@ import com.example.bytedancehomework.data.Item.FeedItem;
 import com.example.bytedancehomework.R;
 import com.example.bytedancehomework.manager.ExposureTracker;
 import com.example.bytedancehomework.manager.VideoPlayManager;
+import com.example.bytedancehomework.ui.Adapter.VideoViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +60,14 @@ public class MainActivity extends AppCompatActivity
         initializeComponents();
         setupUI();
         initializeData();
+        initVideoPlayManager();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(videoPlayManager!=null)
+            videoPlayManager.pausePlayback();
     }
 
     @Override
@@ -90,6 +100,12 @@ public class MainActivity extends AppCompatActivity
             addSampleData();
         }
         adapter.refreshData();
+    }
+
+    public void initVideoPlayManager()
+    {
+        videoPlayManager.setDbHelper(dbHelper);
+        videoPlayManager.setPlaybackStateListener(this);
     }
 
     // ==================== UI设置方法 ====================
@@ -313,7 +329,7 @@ public class MainActivity extends AppCompatActivity
     // ==================== 视频监听器实现 ====================
     @Override
     public void onPlaybackStarted(FeedItem item) {
-
+        Log.d("MainActivity", "视频开始播放: " + item.getTitle());
     }
 
     @Override
@@ -328,12 +344,40 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onPlaybackCompleted(FeedItem item) {
-
+        runOnUiThread(() -> {
+            Toast.makeText(this, "播放完成: " + item.getTitle(), Toast.LENGTH_SHORT).show();
+            autoPlayNextVideo(item);
+        });
     }
 
     @Override
     public void onPlaybackError(FeedItem item, String error) {
+        runOnUiThread(() -> {
+            Toast.makeText(this, "播放失败: " + error, Toast.LENGTH_SHORT).show();
+            Log.e("MainActivity", "视频播放错误: " + error);
+        });
+    }
 
+    private void autoPlayNextVideo(FeedItem item) {
+        int currentPosition = adapter.getPosition(item);
+        if(currentPosition==-1) return;
+
+        for(int i=currentPosition+1;i<adapter.getItemCount();i++)
+        {
+            View nextView = recyclerView.getLayoutManager().findViewByPosition(i);
+            if(nextView!=null)
+            {
+                FeedItem nextItem=adapter.getItemAt(i);
+                if(nextItem!=null&&nextItem.isVideo())
+                {
+                    RecyclerView.ViewHolder viewHolder=recyclerView.findViewHolderForAdapterPosition(i);
+                    if(viewHolder instanceof VideoViewHolder)
+                    {
+                        ((VideoViewHolder) viewHolder).playVideo();
+                    }
+                }
+            }
+        }
     }
 
     // ==================== 资源清理方法 ====================
@@ -345,6 +389,11 @@ public class MainActivity extends AppCompatActivity
 
         if (dbHelper != null) {
             dbHelper.close();
+        }
+
+        if(videoPlayManager!=null)
+        {
+            videoPlayManager.release();
         }
     }
 }
