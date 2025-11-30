@@ -178,13 +178,24 @@ public class FlexibleAdapter extends RecyclerView.Adapter<BaseViewHolder> {
     }
 
     public void addNewSampleItem() {
-        FeedItem newItem = new FeedItem(
-                "新项目 " + System.currentTimeMillis(),
-                "这是通过菜单添加的新项目内容",
-                "new_url",
-                500, 400, LayoutMode.single
-        );
-        addItem(newItem);
+        List<FeedItem> sampleItems = new ArrayList<>();
+        // 单列视频
+        sampleItems.add(new FeedItem("单列视频标题",
+                "这是单列布局的视频内容描述",
+                "android.resource://" + activity.getPackageName() + "/" + R.raw.test_video,
+                "https://example.com/video_cover1.jpg",
+                1920, 1080, 120000, LayoutMode.single));
+
+        // 网格视频
+        sampleItems.add(new FeedItem("网格视频标题",
+                "这是网格布局的视频内容",
+                "android.resource://" + activity.getPackageName() + "/" + R.raw.test_video,
+                "https://example.com/video_cover2.jpg",
+                1280, 720, 90000, LayoutMode.grid));
+
+        for (FeedItem item : sampleItems) {
+            dbHelper.insertFeedItem(item);
+        }
     }
 
     public void delItem(int position) {
