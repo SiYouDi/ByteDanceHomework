@@ -72,7 +72,7 @@ public class VideoViewHolder extends BaseViewHolder {
         });
     }
 
-    private void handleClick() {
+    public void handleClick() {
         if(currentItem==null)
             return;
 
@@ -98,12 +98,12 @@ public class VideoViewHolder extends BaseViewHolder {
         }
     }
 
-    private void showPlayState() {
+    public void showPlayState() {
         videoCoverView.setVisibility(View.VISIBLE);
         playIcon.setVisibility(View.VISIBLE);
     }
 
-    private void hidePlayState() {
+    public void hidePlayState() {
         videoCoverView.setVisibility(View.GONE);
         playIcon.setVisibility(View.GONE);
     }

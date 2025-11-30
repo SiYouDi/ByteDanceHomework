@@ -334,7 +334,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onPlaybackPaused(FeedItem item, int currentPosition) {
-
+        RecyclerView.ViewHolder viewHolder =recyclerView.findViewHolderForAdapterPosition(currentPosition);
+        if(viewHolder!=null)
+        {
+            if(viewHolder instanceof VideoViewHolder)
+            {
+                ((VideoViewHolder) viewHolder).showPlayState();
+            }
+        }
     }
 
     @Override

@@ -35,7 +35,7 @@
         <!-- 视频容器 -->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="200dp"
             android:background="@android:color/black"
             android:minHeight="200dp">
 
@@ -43,16 +43,16 @@
             <VideoView
                 android:id="@+id/videoView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="200dp"
                 android:layout_centerInParent="true" />
 
             <!-- 视频封面 -->
             <ImageView
                 android:id="@+id/videoCoverView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="200dp"
                 android:layout_centerInParent="true"
-                android:scaleType="centerCrop"
+                android:scaleType="fitXY"
                 android:background="@android:color/darker_gray" />
 
             <!-- 播放图标 -->
