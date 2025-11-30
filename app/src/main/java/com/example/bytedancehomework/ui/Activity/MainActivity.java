@@ -301,6 +301,13 @@ public class MainActivity extends AppCompatActivity
         swipeRefreshLayout.setRefreshing(false);
         progressBarLoadMore.setVisibility(View.GONE);
         Log.d("MainActivity", "加载完成，新增 " + newItems.size() + " 条数据");
+
+        // 数据加载完成后，等待 RecyclerView 布局完成再自动播放
+        recyclerView.post(() -> {
+            if (adapter.getItemCount() > 0) {
+                autoPlayVideo();
+            }
+        });
     }
 
     @Override
@@ -373,7 +380,34 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    private void autoPlayVideo()
+    {
+        String TAG="MainActivity";
+        Log.d("MainActivity", "autoPlayVideo: 进入");
+        for(int i=0;i<adapter.getItemCount();i++)
+        {
+//            Log.d(TAG, "autoPlayVideo: "+i);
+            RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(i);
+            if(viewHolder!=null)
+            {
+                FeedItem nextItem=adapter.getItemAt(i);
+//                Log.d("MainActivity", "autoPlayVideo: viewHolder非空");
+                if(nextItem!=null&&nextItem.isVideo())
+                {
+//                    Log.d("MainActivity", "autoPlayVideo: "+i+"为videoViewHolder");
+                    if(viewHolder instanceof VideoViewHolder)
+                    {
+                        ((VideoViewHolder) viewHolder).playVideo();
+//                        Log.d("MainActivity", "autoPlayVideo: 播放");
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     private void autoPlayNextVideo(FeedItem item) {
+        Log.d("MainActivity", "进入autoPlayNextVideo");
         int currentPosition = adapter.getPosition(item);
         if(currentPosition==-1) return;
 
@@ -389,6 +423,7 @@ public class MainActivity extends AppCompatActivity
                     if(viewHolder instanceof VideoViewHolder)
                     {
                         ((VideoViewHolder) viewHolder).playVideo();
+                        Log.d("MainActivity", "播放autoPlayNextVideo");
                     }
                 }
             }
