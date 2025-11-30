@@ -424,6 +424,7 @@ public class MainActivity extends AppCompatActivity
                     {
                         ((VideoViewHolder) viewHolder).playVideo();
                         Log.d("MainActivity", "播放autoPlayNextVideo");
+                        break;
                     }
                 }
             }
