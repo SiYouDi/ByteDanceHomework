@@ -83,17 +83,14 @@ public class VideoViewHolder extends BaseViewHolder {
         }
         else
         {
-            videoPlayManager.setupVideoPlayback(currentItem,videoView);
-            videoPlayManager.startPlayback();
-            hidePlayState();
+            playVideo();
         }
     }
 
 
     public void playVideo() {
         if(currentItem != null) {
-            videoPlayManager.setupVideoPlayback(currentItem, videoView);
-            videoPlayManager.startPlayback();
+            videoPlayManager.setupVideoPlayback(currentItem,videoView);
             hidePlayState();
         }
     }

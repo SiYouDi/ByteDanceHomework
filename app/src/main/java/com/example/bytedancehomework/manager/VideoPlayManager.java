@@ -1,9 +1,14 @@
 package com.example.bytedancehomework.manager;
 
+import android.os.Looper;
+import android.util.Log;
 import android.widget.VideoView;
 
 import com.example.bytedancehomework.data.DBHelper.DatabaseHelper;
 import com.example.bytedancehomework.data.Item.FeedItem;
+
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 public class VideoPlayManager {
 
@@ -21,6 +26,8 @@ public class VideoPlayManager {
     private VideoView currentVideoView;
     private FeedItem currentPlayingItem;
     private DatabaseHelper dbHelper;
+    private Runnable timeoutRunnable;
+    private boolean isPrepared = false;
 
     private VideoPlayManager() {}
 
@@ -71,13 +78,33 @@ public class VideoPlayManager {
 
         currentPlayingItem=item;
         currentVideoView=videoView;
+        isPrepared=false;
+
+        startTimeoutCheck(15000);
 
         try {
+            clearListeners();
+
             currentVideoView.setVideoPath(item.getVideoUrl());
 
-            if (item.getLastPlayPosition() > 0) {
-                currentVideoView.seekTo((int) item.getLastPlayPosition());
-            }
+            currentVideoView.setOnPreparedListener(mp->{
+                isPrepared=true;
+                cancleTimeoutCheck();
+
+                if (item.getLastPlayPosition() > 0) {
+                    currentVideoView.seekTo((int) item.getLastPlayPosition());
+                }
+
+                startPlayback();
+            });
+
+            currentVideoView.setOnErrorListener((mp, what, extra) -> {
+                String errorMsg = "播放错误: ";
+                if (playbackStateListener != null) {
+                    playbackStateListener.onPlaybackError(item, errorMsg);
+                }
+                return true;
+            });
 
             // 统一在 VideoPlayManager 中设置完成监听器
             currentVideoView.setOnCompletionListener(mp -> {
@@ -93,9 +120,47 @@ public class VideoPlayManager {
             if (playbackStateListener != null) {
                 playbackStateListener.onPlaybackError(item, e.getMessage());
             }
-            currentPlayingItem = null;
-            currentVideoView = null;
+            resetPlaybackState();
         }
+    }
+
+    private void startTimeoutCheck(int timeoutMillis) {
+        cancleTimeoutCheck();
+
+        timeoutRunnable=new Runnable() {
+            @Override
+            public void run() {
+                if(!isPrepared)
+                {
+                    onPrepareTimeout();
+                }
+            }
+        };
+
+        currentVideoView.postDelayed(timeoutRunnable,timeoutMillis);
+    }
+
+    private void onPrepareTimeout() {
+        pauseCurrentPlayback();
+
+        if(playbackStateListener!=null)
+            playbackStateListener.onPlaybackError(currentPlayingItem,"onPrepareTimeout");
+
+        resetPlaybackState();
+    }
+
+    private void cancleTimeoutCheck() {
+        if(currentVideoView!=null&&timeoutRunnable!=null)
+        {
+            currentVideoView.removeCallbacks(timeoutRunnable);
+            timeoutRunnable=null;
+        }
+    }
+
+    private void clearListeners() {
+        currentVideoView.setOnPreparedListener(null);
+        currentVideoView.setOnCompletionListener(null);
+        currentVideoView.setOnErrorListener(null);
     }
 
     public void startPlayback()
@@ -107,7 +172,6 @@ public class VideoPlayManager {
                 playbackStateListener.onPlaybackStarted(currentPlayingItem);
             }
         }
-
     }
 
     public void pausePlayback()
@@ -148,8 +212,17 @@ public class VideoPlayManager {
         }
     }
 
+    private void resetPlaybackState() {
+        cancleTimeoutCheck();
+
+        currentPlayingItem = null;
+        currentVideoView = null;
+        isPrepared = false;
+    }
+
     public void release()
     {
         stopPlayback();
+        resetPlaybackState();
     }
 }
