@@ -1,6 +1,7 @@
 // MainActivity.java
 package com.example.bytedancehomework.ui.Activity;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;

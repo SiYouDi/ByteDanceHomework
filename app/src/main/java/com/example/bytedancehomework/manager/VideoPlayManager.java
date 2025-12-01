@@ -28,6 +28,7 @@ public class VideoPlayManager {
     private DatabaseHelper dbHelper;
     private Runnable timeoutRunnable;
     private boolean isPrepared = false;
+    private final String TAG = "VideoPlayManager";
 
     private VideoPlayManager() {}
 
@@ -85,9 +86,23 @@ public class VideoPlayManager {
         try {
             clearListeners();
 
+            Log.d(TAG, "setupVideoPlayback: 视频URL = " + item.getVideoUrl());
+
+            // 验证URL是否有效
+            String videoUrl = item.getVideoUrl();
+            if (videoUrl == null || videoUrl.trim().isEmpty()) {
+                Log.e(TAG, "视频URL为空");
+                if (playbackStateListener != null) {
+                    playbackStateListener.onPlaybackError(item, "视频地址为空");
+                }
+                return;
+            }
+
             currentVideoView.setVideoPath(item.getVideoUrl());
+            Log.d(TAG, "setupVideoPlayback: 设置播放路径完成");
 
             currentVideoView.setOnPreparedListener(mp->{
+                Log.d(TAG, "setupVideoPlayback: 准备完成");
                 isPrepared=true;
                 cancleTimeoutCheck();
 
@@ -99,10 +114,13 @@ public class VideoPlayManager {
             });
 
             currentVideoView.setOnErrorListener((mp, what, extra) -> {
-                String errorMsg = "播放错误: ";
+                Log.e(TAG, "setupVideoPlayback: 播放错误，what=" + what + ", extra=" + extra);
+                cancleTimeoutCheck(); // 错误时也取消超时检测
+                String errorMsg = "播放错误，错误码: " + what + ", " + extra;
                 if (playbackStateListener != null) {
                     playbackStateListener.onPlaybackError(item, errorMsg);
                 }
+                resetPlaybackState(); // 重置状态
                 return true;
             });
 
@@ -150,6 +168,7 @@ public class VideoPlayManager {
     }
 
     private void cancleTimeoutCheck() {
+        Log.d(TAG, "cancleTimeoutCheck: 取消超时检测");
         if(currentVideoView!=null&&timeoutRunnable!=null)
         {
             currentVideoView.removeCallbacks(timeoutRunnable);
@@ -166,6 +185,7 @@ public class VideoPlayManager {
     public void startPlayback()
     {
         if(currentVideoView!=null) {
+            Log.d(TAG, "startPlayback: 开始播放");
             currentVideoView.start();
             if(playbackStateListener!=null&&currentPlayingItem!=null)
             {
