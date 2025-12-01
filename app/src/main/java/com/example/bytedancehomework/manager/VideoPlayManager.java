@@ -81,7 +81,18 @@ public class VideoPlayManager {
         currentVideoView=videoView;
         isPrepared=false;
 
-        startTimeoutCheck(15000);
+        if (videoView != null) {
+            try {
+                // 尝试停止并释放底层MediaPlayer
+                videoView.stopPlayback();
+                videoView.setVideoURI(null);  // 先清空URI
+                videoView.clearFocus();
+            } catch (Exception e) {
+                Log.e(TAG, "重置VideoView状态时出错", e);
+            }
+        }
+
+        startTimeoutCheck(3000);
 
         try {
             clearListeners();
@@ -98,7 +109,18 @@ public class VideoPlayManager {
                 return;
             }
 
-            currentVideoView.setVideoPath(item.getVideoUrl());
+            currentVideoView.post(() -> {
+                try {
+                    currentVideoView.setVideoPath(videoUrl);
+                    Log.d(TAG, "setupVideoPlayback: 设置播放路径完成");
+                } catch (Exception e) {
+                    Log.e(TAG, "设置视频路径失败", e);
+                    if (playbackStateListener != null) {
+                        playbackStateListener.onPlaybackError(item, "设置视频路径失败: " + e.getMessage());
+                    }
+                }
+            });
+
             Log.d(TAG, "setupVideoPlayback: 设置播放路径完成");
 
             currentVideoView.setOnPreparedListener(mp->{
