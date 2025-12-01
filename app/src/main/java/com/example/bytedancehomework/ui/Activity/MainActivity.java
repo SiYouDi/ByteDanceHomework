@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity
         FlexibleAdapter.OnShowLoadMoreButtonListener,
         VideoPlayManager.PlaybackStateListener {
 
+    private String TAG = "MainActivity";
     // UI组件
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -276,12 +277,20 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onItemClick(FeedItem item) {
         int position = adapter.getPosition(item);
+        LayoutMode newLayoutMode=null;
         if (position != -1) {
-            item.setFavorite(!item.isFavorite());
-            adapter.updateItem(position, item);
+            LayoutMode oldLayoutMode = item.getLayoutMode();
+            if(oldLayoutMode==LayoutMode.single)
+                newLayoutMode=LayoutMode.grid;
+            else if (oldLayoutMode==LayoutMode.grid) {
+                newLayoutMode=LayoutMode.single;
+            }
 
-            String message = item.isFavorite() ? "已收藏" : "取消收藏";
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            if(adapter!=null&&newLayoutMode!=null)
+            {
+                adapter.updateLayoutMode(position,newLayoutMode);
+                Log.d(TAG, "onItemClick: "+position+" 的LayoutMode由"+oldLayoutMode+"改为"+item.getLayoutMode());
+            }
         }
     }
 

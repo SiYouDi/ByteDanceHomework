@@ -240,6 +240,28 @@ public class FlexibleAdapter extends RecyclerView.Adapter<BaseViewHolder> {
         }
     }
 
+    public void updateLayoutMode(int position,LayoutMode layoutMode)
+    {
+        if (position < 0 || position >= items.size()) {
+            Log.e("FlexibleAdapter", "updateLayoutMode: 位置越界 - " + position);
+            return;
+        }
+
+        if (layoutMode == null) {
+            Log.e("FlexibleAdapter", "updateLayoutMode: layoutMode 为 null");
+            return;
+        }
+
+        long id = items.get(position).getId();
+        int rowsAffected = dbHelper.updateLayoutMode(id,layoutMode);
+        if (rowsAffected > 0) {
+            items.get(position).setLayoutMode(layoutMode);
+            notifyItemChanged(position);
+        } else {
+            Log.e("FlexibleAdapter", "updateItem: 数据库更新失败");
+        }
+    }
+
     // ==================== 分页加载方法 ====================
 
     public void loadNextPage() {

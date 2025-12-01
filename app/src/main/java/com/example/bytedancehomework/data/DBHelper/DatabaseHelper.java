@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.example.bytedancehomework.Enum.LayoutMode;
 import com.example.bytedancehomework.Enum.MediaType;
 import com.example.bytedancehomework.data.Item.FeedItem;
 
@@ -167,6 +168,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_LAST_PLAY_POSITION, playPosition);
+
+        String selection = COLUMN_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(itemId)};
+
+        int count = db.update(TABLE_FEED_ITEMS, values, selection, selectionArgs);
+        db.close();
+
+        return count;
+    }
+
+    public int updateLayoutMode(long itemId, LayoutMode layoutMode) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_LAYOUT_MODE, layoutMode.ordinal());
 
         String selection = COLUMN_ID + " = ?";
         String[] selectionArgs = {String.valueOf(itemId)};
